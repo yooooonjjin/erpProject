@@ -1,0 +1,38 @@
+#header .h_wrap {
+    background-color: #1e3a8a;
+}
+#header .h_inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#header .h_inner .tit_h1 {
+    /* width: 300px; */
+    text-align: center;
+    color: #fff;
+}
+#header .h_inner .gnb {
+    display: flex;
+    align-items: center;    
+}
+#header .h_inner .gnb li a {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #fff;
+    padding:  30px 60px;
+}
+#header .h_inner .snb a {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+#header .h_inner .snb a::before {
+    content: "";
+    display: inline-block;
+    background: url(img/user_icon.svg) no-repeat center top;
+    width: 22px;
+    height: 25px;
+}

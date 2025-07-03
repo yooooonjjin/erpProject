@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ERP 프로젝트</title>
+	<link rel="stylesheet" href="css/total.css" />
+	<script src="js/jquery-3.7.1.min.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/main.js"></script>
+</head>
+<script>
+    $(function() {
+
+        $('.openModalBtn').on('click', function () {
+            $('#confirm_modal').removeClass('hidden');
+        });
+
+        // 모달 닫기 버튼
+        $('#closeModalBtn, #cancelModalBtn').on('click', function () {
+            $('#confirm_modal').addClass('hidden');
+        });
+    });
+</script>
+<body>
+
+	<!-- header 헤더 시작 -->
+	<header th:replace="fragments/header"></header>
+    <!-- header 헤더 끝 -->
+
+	<!-- section 컨텐츠 영역 시작 -->
+    <section id="section">
+        <!-- 죄측 메뉴바 시작 -->
+        <aside th:replace="fragments/aside"></aside>
+        <!-- 죄측 메뉴바 끝 -->
+
+        <!-- 컨텐츠 영역 시작 -->
+        <div id="contents">
+            <div class="con_title">
+                <h2>발주 목록</h2>
+            </div>
+            <div class="con_top_wrap flex_between">
+                <div class="search_wrap">
+                    <div class="select_box">
+                        <select>
+                            <option value="0" selected>선택하세요.</option>
+                            <option value="1" >자재 코드</option>
+                            <option value="2" >자재명</option>
+                            <option value="3" >자재 분류</option>
+                        </select>
+                    </div>
+                    <div class="search_box">
+                        <input type="search">
+                        <button class="blue_btn">검색</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table_wrap">
+                <table class="table1">
+                    <colgroup>
+                        <col width=""/>
+                        <col width=""/>
+                        <col width=""/>
+                        <col width=""/>
+                        <col width=""/>
+                        <col width=""/>
+                        <col width=""/>
+                        <col width=""/>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>발주코드</th>
+                            <th>신청일자</th>
+                            <th>상태</th>
+                            <th>자재명</th>
+                            <th>신청자</th>
+                            <th>창고명</th>
+                            <th>수량</th>
+                            <th>결재</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="list : ${list}">  
+                        	<td th:text="${list.cate+list.code}"></td>                         
+                            <td th:text="${#dates.format(list.rdate, 'yyyy-MM-dd')}"></td>
+                            <td th:text="${list.state}"
+   								th:style="'color:' + 
+							              (${list.state} == '결재 대기' ? '#ff0000' : 
+							              (${list.state} == '결재 승인' ? '#0000ff' : 
+							              (${list.state} == '결재 반려' ? '#FF9800' : '#000')))"></td>
+                            <td></td>
+                            <td></td>
+                            <td th:text="${list.wnm}"></td>
+                            <td th:text="${list.qty}"></td>
+                            <td>
+                                <button type="button" id="openModalBtn" class="openModalBtn blue_btn"
+                                		th:if="${list.state == '결재 대기'}">결재</button>
+                                <button th:if="${list.state != '결재 대기'}"></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지 시작 -->
+            <div class="div_page flex_center">
+                <!-- 처음 버튼 -->
+                <a href="#none">
+                    <img src="images/page_first.svg" alt="처음 버튼">
+                </a>
+                <!-- 처음 버튼 -->
+
+                <!-- 이전 버튼 -->
+                <a href="#none">
+                    <img src="images/page_prev.svg" alt="처음 버튼">
+                </a>
+                <!-- 이전 버튼 -->
+                 
+                <!-- 페이지 번호 -->
+                <a href="#none" class="page_num">
+                    <p class="flex_center">1</p>
+                </a>
+                <a href="#none" class="page_num">
+                    <p class="flex_center">2</p>
+                </a>
+                <a href="#none" class="page_num">
+                    <p class="flex_center">3</p>
+                </a>
+                <!-- 페이지 번호 -->
+
+                <!-- 다음 버튼 -->
+                <a href="#none">
+                    <img src="images/page_next.svg" alt="처음 버튼">
+                </a>
+                <!-- 다음 버튼 -->
+
+                <!-- 끝 버튼 -->
+                <a href="#none">
+                    <img src="images/page_last.svg" alt="처음 버튼">
+                </a>
+                <!-- 끝 버튼 -->
+
+            </div>
+            <!-- 페이지 끝 -->
+
+        </div>
+        <!-- 컨텐츠 영역 끝 -->
+    </section>
+    <!-- section 컨텐츠 영역 끝 -->
+    
+    
+	<!-- modal 시작 -->
+	<div th:replace="fragments/confirmModal"></div>
+	<!-- modal 끝 -->
+
+
+
+</body>
+</html>

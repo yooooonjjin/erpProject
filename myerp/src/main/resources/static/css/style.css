@@ -1,0 +1,443 @@
+/* 공통 버튼 css 시작 */
+.blue_btn {
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #fff;
+}
+.blue_border_btn {
+    background: #fff;
+    border: 1px solid #2563eb;
+    color: #2563eb;
+}
+.under_btn_wrap {
+    gap: 10px;
+    padding: 20px 0;
+}
+/* 공통 버튼 css 끝 */
+
+/* flex css 시작 */
+.flex_start {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+.flex_end {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.flex_center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.flex_between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.flex_around {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+/* flex css 끝 */
+
+/* 기본 css 제거 시작 */
+input[type="text"], select, textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+}
+
+/* 기본 css 제거 끝 */
+
+/* 페이징 css 시작 */
+.div_page {
+    gap: 20px;
+    padding: 30px 0 !important;
+}
+.div_page .page_num {
+	font-size: 1.4rem;
+    color: #333;
+    font-weight: 400;
+	padding: 7px;
+	transition: 0.3s;
+	background-color: #fff;
+	border-radius: 7px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.div_page .page_num p {
+    width: 20px;
+    height: 20px;
+}
+.div_page .page_num:hover{
+	background-color: #2563eb;
+	color: #fff;
+	transition: 0.3s;
+}
+/* 페이징 css 끝 */
+
+
+#section {
+    height: calc(100vh - 78px);
+    display: flex;  
+}
+
+/* aside css 시작 */
+#aside {
+    width: 300px;
+    border-right: 1px solid #e1e1e1;
+    height: 100%;
+    padding: 20px 0;
+    height: calc(100vh - 78px);
+}
+#aside > ul > li > a {
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: #666;
+    display: flex;
+    align-items: center;
+    padding:  20px;
+    gap: 15px;
+    border-left: 2px solid #fff;
+}
+#aside > ul > li > a::after {
+    content: "";
+    display: inline-block;
+    background: url(img/aside_arrow.svg) no-repeat center top;
+    width: 8px;
+    height: 14px;
+    position: absolute;
+    right: 20px;
+}
+#aside > ul > li > a::before {
+    content: "";
+    display: inline-block;
+    background: url(img/aside_icon01.svg) no-repeat center top;
+    width: 24px;
+    height: 26px;
+}
+#aside > ul > li:nth-child(2) > a::before {
+    background: url(img/aside_icon02.svg) no-repeat center top;
+    height: 22px;
+}
+#aside > ul > li:nth-child(3) > a::before {
+    background: url(img/aside_icon03.svg) no-repeat center top;
+    height: 22px;
+}
+#aside > ul > li:nth-child(4) > a::before {
+    background: url(img/aside_icon04.svg) no-repeat center top;
+    height: 17px;
+}
+#aside > ul > li:nth-child(5) > a::before {
+    background: url(img/aside_icon05.svg) no-repeat center top;
+    height: 17px;
+}
+
+#aside .menu02 {
+    display: none;
+}
+#aside .menu02 li {
+    padding: 10px 35px;
+}
+#aside .menu02 li a {
+    font-size: 1.4rem;   
+    font-weight: 500;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+#aside .menu02 li a::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background-color: #666;
+    border-radius: 50%;
+}
+/* 메뉴 활성화 스타일 */
+#aside > ul > li.selected > a {
+    background-color: #edf2ff;
+    color: #2563eb;    
+    border-left: 2px solid #2563eb;
+}
+#aside > ul > li.selected > a::after {
+    background: url(img/aside_arrow_select.svg) no-repeat center top;
+}
+#aside > ul > li.selected > a::before {
+    background: url(img/aside_icon01_select.svg) no-repeat center top;
+}
+#aside > ul > li.selected:nth-child(2) > a::before {
+    background: url(img/aside_icon02_select.svg) no-repeat center top;
+}
+#aside > ul > li.selected:nth-child(3) > a::before {
+    background: url(img/aside_icon03_select.svg) no-repeat center top;
+}
+#aside > ul > li.selected:nth-child(4) > a::before {
+    background: url(img/aside_icon04_select.svg) no-repeat center top;
+}
+#aside > ul > li.selected:nth-child(5) > a::before {
+    background: url(img/aside_icon05_select.svg) no-repeat center top;
+}
+#aside .menu02 li.selected > a {
+    color: #2563eb;
+}
+#aside .menu02 li.selected > a::before {
+    background-color: #2563eb;
+}
+/* 메뉴 활성화 스타일 */
+/* aside css 끝 */
+
+
+
+/* contents css 시작 */
+#contents {
+    flex-grow: 1; /* aside 제외한 나머지 너비를 모두 차지함 */
+    padding: 30px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow-y: auto;
+    max-height: calc(100vh - 78px);
+    /* background-color: #eeeeee; */
+}
+#contents .con_wrap {
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+}
+#contents > div {
+    width: 100%;
+    padding: 10px 0;
+}
+
+#contents .con_title h2 {
+    font-size: 2.4rem;
+    font-weight: 500;
+    color: #333;
+}
+#contents .con_top_wrap .search_wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+#contents .con_top_wrap .search_wrap .select_box {
+    width: 220px;
+    position: relative;
+}
+#contents .con_top_wrap .search_wrap .select_box select {
+    width: 100%;
+    padding: 9px 16px;
+    border: 1px solid #d1d1d1;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    color: #d1d1d1;
+}
+#contents .con_top_wrap .search_wrap .select_box::after {
+    content: "";
+    display: inline-block;
+    background: url(img/select_arrow.svg) no-repeat center top;
+    width: 14px;
+    height: 8px;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+#contents .con_top_wrap .search_wrap .search_box {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+#contents .con_top_wrap .search_wrap .search_box input[type="search"] {
+    width: 300px;
+    border: 1px solid #d1d1d1;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    color: #d1d1d1;
+}
+#contents .con_top_wrap .top_button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.table1 img {
+    width: 70px;
+    height: 70px;
+    box-shadow: 0px 0px 3px #d1d1d1;
+    border-radius: 7px;
+    padding: 7px;
+}
+.table1, #contents .table2 { 
+    width: 100%;
+    border-collapse: collapse;
+}
+.table1 td {
+    text-align: center;
+}
+.table1 th {
+    font-size: 1.6rem;
+    color: #000;
+    font-weight: 500;
+    background: #f9f9f9;
+    border-top: 2px solid #000;
+    border-bottom: 1px solid #e1e1e1;
+    padding: 15px 0;
+}
+.table1 td {
+	font-size: 1.4rem;
+    color: #333;
+    font-weight: lighter;
+    background: #fff;
+	border-bottom: 1px solid #e1e1e1;
+    padding: 10px 0;
+}
+.table1 input[type="text"] {
+    width: 90%;
+    border: 1px solid #d1d1d1;
+    padding: 10px;
+    border-radius: 6px;
+}
+.table1 .select_box {
+    position: relative;
+}
+.table1 .select_box select {
+    width: 90%;
+    padding: 10px;
+    border: 1px solid #d1d1d1;
+    border-radius: 6px;
+    color: #666;
+}
+.table1 .select_box::after {
+    content: "";
+    display: inline-block;
+    background: url(img/table_arrow.svg) no-repeat center top;
+    width: 18px;
+    height: 8px;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.table1 button {
+    font-size: 1.2rem;
+}
+.table1 .date_box {
+    position: relative;
+}
+.table1 .date_box::after {
+    content: "";
+    display: inline-block;
+    background: url(img/date_icon.svg) no-repeat center top;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    right: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.table2 {
+    border-top: 2px solid #000;
+}
+.table2 th {
+    width: 20%;
+    text-align: left;
+}
+.table2 td {
+    width: 79%;
+}
+.table2 tr {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e1e1e1;
+}
+.table2 label {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #333;
+}
+.table2 span {
+    color: #f00;
+}
+.table2 input[type="text"] {
+    width: 100%;
+    border: 1px solid #d1d1d1;
+    padding: 15px;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    color: #666;
+}
+.table2 textarea {
+    width: 100%;
+    border: 1px solid #d1d1d1;
+    padding: 15px;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    color: #666;
+    height: 150px;
+ }
+.table2 .readonly {
+    border: 1px solid #fff !important;
+}
+.table2 .select_box {
+    width: 79%;
+    position: relative;
+}
+.table2 .select_box select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #d1d1d1;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    color: #666;
+}
+.table2 .select_box::after {
+    content: "";
+    display: inline-block;
+    background: url(img/table_arrow.svg) no-repeat center top;
+    width: 18px;
+    height: 8px;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.table2 .date_box {
+    position: relative;
+}
+.table2 .date_box::after {
+    content: "";
+    display: inline-block;
+    background: url(img/date_icon.svg) no-repeat center top;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+/* contents css 끝 */
+
+/* 작업지시 상태값 버튼 css 시작 */
+.table1 .waiting {
+    color: #666;
+    font-weight: 500;
+}
+.table1 .progress {
+    color: #f00;
+    font-weight: 500;
+}
+.table1 .completed {
+    color: #00f;
+    font-weight: 500;
+}
+/* 작업지시 상태값 버튼 css 끝 */
