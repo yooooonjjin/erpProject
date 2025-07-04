@@ -67,4 +67,7 @@ public class OrdersDto {
 
     @Column(name="WNM", length=20)
     private String wnm; // 창고명
+    
+    @Column(nullable=false) // 외래키 자재코드
+    private int ivnCode;
 }
