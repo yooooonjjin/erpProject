@@ -25,25 +25,25 @@ public class DailyStockDto {
 	@Id  // 기본키 설정
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@SequenceGenerator(name="dailyStock_seq", sequenceName = "DAILYSTOCK_SEQ", allocationSize = 1, initialValue = 1001)
-    Integer dlyId;
+    Integer dlyid;
 	
 	@Column(nullable=false)
 	Integer matid;		// 자재 ID
 	
 	@Column(nullable=false, length=20)
-	String stkDate;		// 재고 일자
+	String stkdate;		// 재고 일자
 	
 	@Column(nullable=false, length=20)
-	String startQty;		// 전월 이월 수량
+	String startqty;		// 전월 이월 수량
 	
 	@Column(nullable=false, length=20)
-	String inQty;		// 당일 입고 수량
+	String inqty;		// 당일 입고 수량
 	
 	@Column(nullable=false, length=20)
-	String outQty;	// 당일 출고 수량
+	String outqty;	// 당일 출고 수량
 	
 	@Column(nullable=false, length=20)
-	String endQty;	// 당일 최종 수량
+	String endqty;	// 당일 최종 수량
 		
 	@Column(nullable=false, length=100)
 	String note;		// 특이사항

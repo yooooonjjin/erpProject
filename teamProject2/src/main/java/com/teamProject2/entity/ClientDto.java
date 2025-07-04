@@ -28,7 +28,7 @@ public class ClientDto {
 	@Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_seq_gen")
     @SequenceGenerator(name="client_seq_gen", sequenceName = "CLIENT_SEQ", allocationSize = 1, initialValue = 1001)
-	private int cltCode;
+	private int cltcode;
 	
 	@Column(length=10,nullable=false)
 	private String cate;

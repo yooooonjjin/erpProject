@@ -26,25 +26,25 @@ public class MonthlyStockDto {
 	@Id  // 기본키 설정
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@SequenceGenerator(name="monthlyStock_seq", sequenceName = "MONTHLYSTOCK_SEQ", allocationSize = 1, initialValue = 1001)
-	Integer mlyId;
+	Integer mlyid;
 	
 	@Column(nullable=false)
 	Integer matid;		// 자재 ID
 	
 	@Column(nullable=false, length=50)
-	String yearMonth;		// 재고 기준 년월
+	String yearmonth;		// 재고 기준 년월
 	
 	@Column(nullable=false, length=20)
-	String startQty;		// 이월 수량
+	String startqty;		// 이월 수량
 	
 	@Column(nullable=false, length=20)
-	String inQty;		// 입고 수량
+	String inqty;		// 입고 수량
 	
 	@Column(nullable=false, length=20)
-	String outQty;	// 출고 수량
+	String outqty;	// 출고 수량
 	
 	@Column(nullable=false, length=20)
-	String endQty;	// 잔여 수량
+	String endqty;	// 잔여 수량
 		
 	@Column(nullable=false, length=100)
 	String note;		// 특이사항
