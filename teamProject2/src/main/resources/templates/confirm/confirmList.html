@@ -37,7 +37,7 @@
         <!-- 컨텐츠 영역 시작 -->
         <div id="contents">
             <div class="con_title">
-                <h2>발주 목록</h2>
+                <h2>결재 목록</h2>
             </div>
             <div class="con_top_wrap flex_between">
                 <div class="search_wrap">
@@ -80,8 +80,12 @@
                         </tr>
                     </thead>
                     <tbody>
+                    
                         <tr th:each="list : ${list}">  
-                        	<td th:text="${list.cate+list.code}"></td>                         
+                        	<td >
+                        		<a th:href="@{|/confirm/${list.code}|}"
+                        		   th:text="${list.cate}+${list.code}"></a>
+                        	</td>                         
                             <td th:text="${#dates.format(list.rdate, 'yyyy-MM-dd')}"></td>
                             <td th:text="${list.state}"
    								th:style="'color:' + 
@@ -89,13 +93,14 @@
 							              (${list.state} == '결재 승인' ? '#0000ff' : 
 							              (${list.state} == '결재 반려' ? '#FF9800' : '#000')))"></td>
                             <td></td>
-                            <td></td>
+                            <td th:text="${list.mgr}"></td>
                             <td th:text="${list.wnm}"></td>
                             <td th:text="${list.qty}"></td>
                             <td>
                                 <button type="button" id="openModalBtn" class="openModalBtn blue_btn"
                                 		th:if="${list.state == '결재 대기'}">결재</button>
-                                <button th:if="${list.state != '결재 대기'}"></button>
+                                <button th:if="${list.state != '결재 대기'}"
+                                		th:style="${list.state != '결재 대기'} ? 'visibility:hidden' : ''">결재</button>
                             </td>
                         </tr>
                     </tbody>

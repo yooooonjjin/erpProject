@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ERP 프로젝트</title>
+	<link rel="stylesheet" href="/css/total.css" />
+	<script src="/js/jquery-3.7.1.min.js"></script>
+	<script src="/js/jquery.min.js"></script>
+	<script src="/js/main.js"></script>
+</head>
+<script>
+	function goToList() {
+		location = "/confirm";
+	}
+</script>
+<body>
+
+	<!-- header 헤더 시작 -->
+	<header th:replace="fragments/header"></header>
+    <!-- header 헤더 끝 -->
+
+	<!-- section 컨텐츠 영역 시작 -->
+    <section id="section">
+        <!-- 죄측 메뉴바 시작 -->
+        <aside th:replace="fragments/aside"></aside>
+        <!-- 죄측 메뉴바 끝 -->
+
+        <!-- 컨텐츠 영역 시작 -->
+        <div id="contents">
+            <div class="con_title">
+                <h2>결재 상세보기</h2>
+            </div>
+            <div class="table_wrap">
+                <table class="table2">
+                    <tr>
+                        <th>
+                            <label>발주번호</label>
+                        </th>
+                        <td>
+                            <input type="text" th:value="${orderDto.cate}+${orderDto.code}" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>신청일자</label>
+                        </th>
+                        <td>
+                            <input type="text" class="readonly" 
+                            	   th:value="${#dates.format(orderDto.rdate, 'yyyy-MM-dd')}" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>상태</label>
+                        </th>
+                        <td>
+                            <input type="text" class="readonly"
+                            	   th:value="${orderDto.state}"
+                            	   th:style="'color:' + 
+								              (${orderDto.state} == '결재 대기' ? '#ff0000' : 
+								              (${orderDto.state} == '결재 승인' ? '#0000ff' : 
+								              (${orderDto.state} == '결재 반려' ? '#FF9800' : '#000')))"
+                            	   readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>발주 담당자</label>
+                        </th>
+                        <td>
+                            <input type="text" th:value="${orderDto.mgr}" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>발주창고명</label>
+                        </th>
+                        <td>
+                            <input type="text" th:value="${orderDto.wnm}" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>납기일</label>
+                        </th>
+                        <td>
+                            <input type="text" class="readonly"
+                            	   th:value="${#dates.format(orderDto.odate, 'yyyy-MM-dd')}" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>발주 특이사항</label>
+                        </th>
+                        <td>
+                            <input type="text" th:value="${orderDto.note}" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>자재명</label>
+                        </th>
+                        <td>
+                            <input type="text" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>품목 특이사항</label>
+                        </th>
+                        <td>
+                            <input type="text" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>수량</label>
+                        </th>
+                        <td>
+                            <input type="text" class="readonly"
+       							   th:value="${orderDto.qty + ' 개'}" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>단가</label>
+                        </th>
+                        <td>
+                            <input type="text" class="readonly"
+       							   th:value="${orderDto.uprc + ' 원'}" readonly>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>총 금액</label>
+                        </th>
+                        <td>
+                            <input type="text" class="readonly"
+       							   th:value="${orderDto.tprc + ' 원'}" readonly>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </div>
+            <div class="under_btn_wrap flex_center">
+                <button type="button" class="blue_btn"
+                	    th:if="${orderDto.state == '결재 대기'}">결재</button>
+                <button type="button" onclick="goToList()" class="blue_border_btn">목록</button>
+            </div>
+        </div>
+        <!-- 컨텐츠 영역 끝 -->
+    </section>
+    <!-- section 컨텐츠 영역 끝 -->
+
+
+</body>
+</html>
