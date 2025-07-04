@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class MonthlyStockDto {
 
 	@Id  // 기본키 설정
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name="monthlyStock_seq", sequenceName = "MONTHLYSTOCK_SEQ", allocationSize = 1, initialValue = 1001)
 	Integer id;
 	
 	@Column(nullable=false)

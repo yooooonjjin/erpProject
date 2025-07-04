@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class ReasonDto {
 
 	@Id  // 기본키 설정
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name="reason_seq", sequenceName = "REASON_SEQ", allocationSize = 1, initialValue = 1001)
 	Integer code;
 	
 	@Column(nullable=false, length=3)
@@ -41,7 +43,7 @@ public class ReasonDto {
 	@Column(nullable=false)
 	Timestamp rdate;	// 등록일
 	
-	@Column(nullable=false)
+	@Column
 	Timestamp udate;	// 수정일
 	
 

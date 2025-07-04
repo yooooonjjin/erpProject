@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,8 @@ public class DailyStockDto {
 	
 	@Id  // 기본키 설정
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Integer id;
+	@SequenceGenerator(name="dailyStock_seq", sequenceName = "DAILYSTOCK_SEQ", allocationSize = 1, initialValue = 1001)
+    Integer id;
 	
 	@Column(nullable=false)
 	Integer matid;		// 자재 ID
