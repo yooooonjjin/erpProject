@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ERP 프로젝트</title>
+  <link rel="stylesheet" href="css/total.css" />
+  <script src="js/jquery-3.7.1.min.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/main.js"></script>
+</head>
+<script>
+    $(function() {
+
+        $('.openModalBtn').on('click', function () {
+            $('#requestOrder_modal').removeClass('hidden');
+        });
+
+        // 모달 닫기 버튼
+        $('#closeModalBtn').on('click', function () {
+            $('#requestOrder_modal').addClass('hidden');
+        });
+    });
+</script>
+<body>
+
+    <!-- skip 네비게이션 영역 -->
+    <nav id="skipToContent">
+        <ul>
+            <li><a href="#container">Skip to Main Content</a></li>
+            <li><a href="#gnb">Skip to Main Menu</a></li>
+            <li><a href="#header">Skip to Upeer Menu</a></li>
+            <li><a href="#footers">Skip to Lower Menu</a></li>
+        </ul>
+    </nav>
+    <!-- skip 네비게이션 영역 -->
+
+    <!-- header 헤더 시작 -->
+    <header id="header">   
+
+        <div class="h_wrap">
+            <div class="h_inner center">
+                <!-- header 로고 영역 -->
+                <a href="index.html">
+                    <h1 class="tit_h1">
+                        <span class="blind">ERP SPARK</span>
+                    </h1>
+                </a>
+                <!-- header 로고 영역 -->
+
+                <!-- header gnb 영역 -->
+                <ul class="gnb">
+                    <li>
+                        <a href="#none">자재 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">발주 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">입고 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">공급처 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">마이페이지</a>
+                    </li>
+                </ul>
+                <!-- header gnb 영역 -->
+
+                <!-- header snb 영역 -->
+                <div class="snb">
+                    <a href="#none">김철수님</a>
+                </div>
+                <!-- header snb 영역 -->
+            </div>
+        </div>
+    </header>
+    <!-- header 헤더 끝 -->
+
+    <!-- section 컨텐츠 영역 시작 -->
+    <section id="section">
+        <!-- 죄측 메뉴바 시작 -->
+        <aside id="aside">
+            <ul>
+                <li class="menu01">
+                    <a href="#none">자재 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">자재 목록</a>
+                        </li>
+                        <li>
+                            <a href="#none">자재 등록</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu01">
+                    <a href="#none">발주 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">발주 목록</a>
+                        </li>
+                        <li>
+                            <a href="#none">발주 신청</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu01">
+                    <a href="#none">입고 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">입고 목록</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="menu01">
+                    <a href="#none">공급처 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">공급처 목록</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="menu01">
+                    <a href="#none">마이페이지</a>
+                </li>
+            </ul>
+        </aside>
+        <!-- 죄측 메뉴바 끝 -->
+
+        <!-- 컨텐츠 영역 시작 -->
+        <div id="contents">
+            <div class="con_title">
+                <h2>자재 목록</h2>
+            </div>
+            <div class="con_top_wrap flex_between">
+                <div class="search_wrap">
+                    <div class="select_box">
+                        <select>
+                            <option value="0" selected>선택하세요.</option>
+                            <option value="1" >자재 코드</option>
+                            <option value="2" >자재명</option>
+                            <option value="3" >자재 분류</option>
+                        </select>
+                    </div>
+                    <div class="search_box">
+                        <input type="search" placeholder="검색어를 입력하세요.">
+                        <button class="blue_btn">검색</button>
+                    </div>
+                </div>
+                <div class="top_button">
+                    <button type="button" class="blue_btn">선택 발주</button>
+                </div>
+            </div>
+            <div class="table_wrap">
+                <table class="table1">
+                    <colgroup> 
+                        <col width="3%"/>
+                        <col width="5%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="15%"/>
+                        <col width="15%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="*"/>
+                        <col width="15%"/>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="checkAll"></th>
+                            <th>번호</th>
+                            <th>이미지</th>
+                            <th>자재코드</th>
+                            <th>자재명</th>
+                            <th>단위</th>
+                            <th>단가</th>
+                            <th>수량</th>
+                            <th>특이사항</th>
+                            <th>발주</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="mat,myStat:${matList}">
+                        	<td><input type="checkbox"  class="rowCheck"></td>
+                        	<td th:text="${startPageRownum-myStat.index}"></td>
+                            <td th:text="${mat.img}"></td>
+                            <td th:text="${mat.cate+mat.code}"></td>
+                            <td th:text="${mat.name}"></td>
+                            <td th:text="${mat.unit}"></td>
+                            <td class="comma" th:text="${mat.uprc}"></td>
+                            <td class="comma" th:text="${mat.qty}"></td>
+                            <td th:text="${mat.note == null ? '-' : mat.note}"></td>
+                            <td>
+                                <button type="button" id="openModalBtn" class="openModalBtn blue_btn">
+                                	발주
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지 시작 -->
+            <div class="div_page flex_center">
+                <!-- 처음 버튼 -->
+                <a th:href="${currentPage > 0} ? '/order?indexpage=1' : '#'"
+                   th:style="${currentPage > 0} ? 'cursor: pointer;' : 'cursor: default;'" >
+				    <img src="images/page_first.svg" alt="처음 버튼">
+				</a>
+                <!-- 처음 버튼 -->
+
+                <!-- 이전 버튼 -->
+                <a th:href="${currentPage > 0} ? '/order?indexpage=' + ${currentPage} : '#'"
+                   th:style="${currentPage > 0} ? 'cursor: pointer;' : 'cursor: default;'">
+                    <img src="images/page_prev.svg" alt="처음 버튼">
+                </a>
+                <!-- 이전 버튼 -->
+                 
+                <!-- 페이지 번호 -->
+                <span th:each="n:${#numbers.sequence(1,ptotalPage)}" >
+                	<a class="page_num" th:href="@{|/order?indexpage=${n}|}">
+                		<span class="flex_center" th:text="${n}"></span>
+                	</a>	<!-- 띄어쓰기 하기 위해 span 두개 -->
+                </span>
+                <!-- 페이지 번호 -->
+
+                <!-- 다음 버튼 -->
+                <a th:href="${currentPage + 1 < ptotalPage} ? '/order?indexpage=' + (${currentPage + 2}) : '#'"
+                   th:style="${currentPage + 1 < ptotalPage} ? 'cursor: pointer;' : 'cursor: default;'">
+                    <img src="images/page_next.svg" alt="처음 버튼">
+                </a>
+                <!-- 다음 버튼 -->
+
+                <!-- 끝 버튼 -->
+                <a th:href="${currentPage + 1 < ptotalPage} ? '/order?indexpage=' + ${ptotalPage} : '#'"
+                   th:style="${currentPage + 1 < ptotalPage} ? 'cursor: pointer;' : 'cursor: default;'">
+                    <img src="images/page_last.svg" alt="처음 버튼">
+                </a>
+                <!-- 끝 버튼 -->
+
+            </div>
+            <!-- 페이지 끝 -->
+            </div>
+
+        </div>
+        <!-- 컨텐츠 영역 끝 -->
+    </section>
+    <!-- section 컨텐츠 영역 끝 -->
+
+
+    
+    <!-- modal 시작 -->
+    <div id="requestOrder_modal" class="modal_container hidden">
+        <div id="modal_con"class="modal_con center">
+        
+        <form id="frm">
+            <div class="modal_header">
+                <h2>발주 신청</h2>
+                <button type="button" id="closeModalBtn">
+                    <img src="images/modalClose_btn.svg" alt="모달 닫기 버튼">
+                </button>
+            </div>
+            <div class="modal_body">
+                <div class="table_wrap">
+                    <div class="table_con">
+                        <p class="table_title">발주 정보 입력</p>
+                        <table class="table1">
+                            <thead>
+                                <tr>
+                                    <th>자재코드</th>
+                                    <th>자재명</th>
+                                    <th>공급처</th>
+                                    <th>창고명</th>
+                                    <th>납기일</th>
+                                    <th>수량</th>
+                                    <th>단가</th>
+                                    <th>총 금액</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>MAT00</td>
+                                    <td>알루미늄 케이스</td>
+                                    <td class="select_box">
+                                        <select>
+                                            <option selected>선택하세요.</option>
+                                            <option th:each="supList:${supList}" value="1"><span th:text="${supList.name}"></span></option>
+                                        </select>
+                                    </td>
+                                    <td class="select_box">
+                                        <select>
+                                            <option selected>선택하세요.</option>
+                                            <option value="본사 1창고">본사 1창고</option>
+                                            <option value="본사 2창고">본사 2창고</option>
+                                            <option value="외주 물류창고">외주 물류창고</option>
+                                        </select>
+                                    </td>
+                                    <td class="date_box">
+                                        <input type="text" id="datepicker" placeholder="날짜를 선택하세요.">
+                                    </td>
+                                    <td>
+                                        <input type="text" placeholder="수량을 입력하세요.">
+                                    </td>
+                                    <td>12,000원</td>
+                                    <td>6,000,000(수량 * 단가)</td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table_con">
+                        <p class="table_title">발주 내역 미리보기</p>
+                        <table class="table1">
+                            <thead>
+                                <tr>
+                                    <th>자재코드</th>
+                                    <th>자재명</th>
+                                    <th>공급처</th>
+                                    <th>창고명</th>
+                                    <th>납기일</th>
+                                    <th>수량</th>
+                                    <th>단가</th>
+                                    <th>총 금액</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table_padd">
+                                    <td>MAT00</td>
+                                    <td>알루미늄 케이스</td>
+                                    <td>공급처1</td>
+                                    <td>창고명3</td>
+                                    <td>2025-06-07</td>
+                                    <td>100개</td>
+                                    <td>12,000원</td>
+                                    <td>6,000,000</td>
+                                </tr>
+                                <tr class="table_padd">
+                                    <td>MAT00</td>
+                                    <td>알루미늄 케이스</td>
+                                    <td>공급처1</td>
+                                    <td>창고명3</td>
+                                    <td>2025-06-07</td>
+                                    <td>100개</td>
+                                    <td>12,000원</td>
+                                    <td>6,000,000</td>
+                                </tr>
+                                <tr class="table_padd">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>합계</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>12,000,000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="under_btn_wrap flex_center">
+                <button type="button" class="blue_btn">신청</button>
+                <button type="reset" class="blue_border_btn">취소</button>
+            </div>
+            </form>
+        </div>
+    </div>
+    <!-- modal 끝 -->
+
+<!-- JS: 화면 출력용 콤마처리 -->
+<script>
+    // 숫자에 콤마 찍기 (간단 버전)
+    function numberWithCommas(x) {
+        if (!x) return '0';
+        return Number(x).toLocaleString(); // ✔ 쉬움!
+    }
+
+    // 페이지 로드시 숫자들에 콤마 붙이기
+    $(function() {
+        $('.comma').each(function() {
+            const raw = $(this).text().trim();
+            const formatted = numberWithCommas(raw);
+            $(this).text(formatted);
+        });
+    });
+</script>
+
+<!-- 체크박스 선택,해제,모달창연결 -->
+<script>  
+$(function() {
+    // 전체 선택/해제
+    $('#checkAll').on('change', function() {
+        const isChecked = $(this).is(':checked');
+        $('.rowCheck').prop('checked', isChecked);
+    });
+
+    // 개별 체크박스 중 하나라도 해제되면 전체선택 해제
+    $('.rowCheck').on('change', function() {
+        const allChecked = $('.rowCheck').length === $('.rowCheck:checked').length;
+        $('#checkAll').prop('checked', allChecked);
+    });
+});
+</script>
+
+
+
+</body>
+</html>

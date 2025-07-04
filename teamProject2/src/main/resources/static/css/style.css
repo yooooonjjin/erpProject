@@ -1,4 +1,8 @@
 /* 공통 버튼 css 시작 */
+form{
+	width:100%;
+}
+
 .blue_btn {
     background: #2563eb;
     border: 1px solid #2563eb;
