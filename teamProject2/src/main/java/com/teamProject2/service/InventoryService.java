@@ -33,7 +33,7 @@ public class InventoryService {
 	public Page<InventoryDto> list(int page, int size){ 
 		// PageRequest.of(현재 페이지 번호(출력 페이지 번호), 화면에 보여질 갯수)
 		// Pageable : 페이징 처리를 위한 스프링에서 제공하는 인터페이스,페이징처리 조건을 담는
-		Pageable pageable = PageRequest.of(page, size,Sort.by("code").descending()); // of 페이징처리를 위한 클래스
+		Pageable pageable = PageRequest.of(page, size,Sort.by("invcode").descending()); // of 페이징처리를 위한 클래스
 		return inventoryRepository.findAll(pageable);
 	}
 	
