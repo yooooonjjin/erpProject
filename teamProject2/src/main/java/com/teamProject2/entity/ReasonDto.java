@@ -26,7 +26,7 @@ public class ReasonDto {
 	@Id  // 기본키 설정
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@SequenceGenerator(name="reason_seq", sequenceName = "REASON_SEQ", allocationSize = 1, initialValue = 1001)
-	Integer code;
+	Integer rsnCode;
 	
 	@Column(nullable=false, length=3)
 	String cate;		// 구분

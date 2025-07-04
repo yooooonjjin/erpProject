@@ -28,7 +28,7 @@ public class OrdersDto {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_seq_gen")
     @SequenceGenerator(name="orders_seq", sequenceName = "ORDERS_SEQ", allocationSize = 1, initialValue = 1001)
-    private int code;
+    private int ordCode;
 
     @Column(name="CATE", length=10, nullable=false)
     private String cate;

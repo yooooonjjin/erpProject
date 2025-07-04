@@ -28,7 +28,7 @@ public class InventoryDto {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inventory_seq_gen")
     @SequenceGenerator(name="inventory_seq_gen", sequenceName = "INVENTORY_SEQ", allocationSize = 1, initialValue = 1001)
-    private int code;
+    private int invCode;
 
     @Column(length=10, nullable=false)
     private String cate;

@@ -25,7 +25,7 @@ public class DailyStockDto {
 	@Id  // 기본키 설정
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@SequenceGenerator(name="dailyStock_seq", sequenceName = "DAILYSTOCK_SEQ", allocationSize = 1, initialValue = 1001)
-    Integer id;
+    Integer dlyId;
 	
 	@Column(nullable=false)
 	Integer matid;		// 자재 ID
