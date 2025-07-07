@@ -1,8 +1,10 @@
 package com.teamProject2.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.myerp.entity.InventoryDto;
-import com.myerp.entity.InventoryId;
+
+import com.teamProject2.entity.InventoryDto;
+import com.teamProject2.entity.InventoryId;
+
 
 public interface InventoryRepository extends JpaRepository<InventoryDto, InventoryId> {
     
