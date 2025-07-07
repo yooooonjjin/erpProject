@@ -1,9 +1,12 @@
 package com.teamProject2.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.myerp.entity.OrdersDto;
+import com.myerp.entity.OrdersId;
 
-import com.teamProject2.entity.OrdersDto;
-
-public interface OrdersRepository extends JpaRepository<OrdersDto,Integer>{
-
+public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
+    // 필요한 커스텀 쿼리 추가 가능
+	Page<OrdersDto> findByOgubun(String ogubun, Pageable pageable);
 }

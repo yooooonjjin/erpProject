@@ -1,24 +1,14 @@
 package com.teamProject2.entity;
 
 import java.sql.Timestamp;
-
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 @Entity
-@Table(name="ORDERS")
+@Table(name = "ORDERS")
+@IdClass(OrdersId.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,48 +16,61 @@ import lombok.NoArgsConstructor;
 public class OrdersDto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_seq_gen")
-    @SequenceGenerator(name="orders_seq", sequenceName = "ORDERS_SEQ", allocationSize = 1, initialValue = 1001)
-    private int ordcode;
+    @Column(name = "ONO")
+    private Integer ono;  // 발주/입고 번호
 
-    @Column(name="CATE", length=10, nullable=false)
-    private String cate;
+    @Id
+    @Column(name = "OGUBUN", length = 3)
+    private String ogubun;  // 구분 (ORD, STI)
 
-    @Column(name="QTY", nullable=false)
-    private int qty;
+    @Id
+    @Column(name = "OCCODE")
+    private Integer occode;  // 발주서/입고서 행번호
 
-    @Column(name="UPRC", nullable=false)
-    private int uprc;
+    @Column(name = "OUPRC", nullable = false)
+    private Integer ouprc;  // 단가
 
-    @Column(name="TPRC", nullable=false)
-    private int tprc;
+    @Column(name = "OQTY", nullable = false)
+    private Integer oqty;   // 수량
 
-    @Column(name="STATE", length=20)
-    private String state;
+    @Column(name = "OTPRC", nullable = false)
+    private Integer otprc;  // 총 금액
+
+    @Column(name = "OSTATE", length = 20)
+    private String ostate;  // 상태
 
     @CreationTimestamp
-    @Column(name="RDATE")
-    private Timestamp rdate;
+    @Column(name = "ORDATE")
+    private Timestamp ordate;  // 발주일자
 
     @UpdateTimestamp
-    @Column(name="UDATE")
-    private Timestamp udate;
+    @Column(name = "OUDATE")
+    private Timestamp oudate;  // 수정일
 
-    @Column(name="IDATE")
-    private Timestamp idate; // 입고처리일
+    @Column(name = "OIDATE")
+    private Timestamp oidate;  // 입고처리일
 
-    @Column(name="ODATE")
-    private Timestamp odate; // 발주납기일
+    @Column(name = "ODATE")
+    private Timestamp odate;  // 발주납기일
 
-    @Column(name="NOTE", length=100)
-    private String note;
+    @Column(name = "OMGR", length = 20)
+    private String omgr;  // 담당자
 
-    @Column(name="MGR", length=10)
-    private String mgr;
+    @Column(name = "OWNM", length = 20)
+    private String ownm;  // 창고명
 
-    @Column(name="WNM", length=20)
-    private String wnm; // 창고명
-    
-    @Column(nullable=false) // 외래키 자재코드
-    private int ivncode;
+    @Column(name = "SUPCD")
+    private Integer supcd;  // 공급처코드 (FK)
+
+    @Column(name = "EMPCD")
+    private Integer empcd;  // 사원번호 (FK)
+
+    @Column(name = "MATCD")
+    private Integer matcd;  // 원재료코드 (FK)
+
+    @Column(name = "PRDCD")
+    private Integer prdcd;  // 완제품코드 (FK)
+
+    @Column(name = "FACCD")
+    private Integer faccd;  // 설비품 코드 (FK)
 }

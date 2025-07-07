@@ -1,9 +1,11 @@
 package com.teamProject2.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.myerp.entity.InventoryDto;
+import com.myerp.entity.InventoryId;
 
-import com.teamProject2.entity.InventoryDto;
-
-public interface InventoryRepository extends JpaRepository<InventoryDto,Integer>{
-
+public interface InventoryRepository extends JpaRepository<InventoryDto, InventoryId> {
+    
+    // 카테고리별로 가장 큰 코드 조회
+    InventoryDto findTopByIgubunOrderByIccodeDesc(String igubun);
 }

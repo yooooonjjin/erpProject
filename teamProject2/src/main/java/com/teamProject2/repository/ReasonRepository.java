@@ -1,9 +1,9 @@
 package com.teamProject2.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.myerp.entity.ReasonDto;
+import com.myerp.entity.ReasonId;
 
-import com.teamProject2.entity.ReasonDto;
-
-public interface ReasonRepository extends JpaRepository<ReasonDto, Integer> {
-
+public interface ReasonRepository extends JpaRepository<ReasonDto, ReasonId> {
+    // 기본 CRUD 메서드 제공
 }
