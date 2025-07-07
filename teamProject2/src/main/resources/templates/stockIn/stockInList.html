@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>모달창</title>
+  <link rel="stylesheet" href="/css/total.css" />
+  <script src="js/jquery-3.7.1.min.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/main.js"></script>
+</head>
+<script>
+    $(function() {
+
+        $('.openModalBtn').on('click', function () {
+            $('#requestOrder_modal').removeClass('hidden');
+        });
+
+        // 모달 닫기 버튼
+        $('#closeModalBtn, #cancelModalBtn').on('click', function () {
+            $('#requestOrder_modal').addClass('hidden');
+        });
+        
+        $('#searchBtn').on('click', function () {
+            const option = $('#filterOption').val();
+            const keyword = $('#searchInput').val().trim().toLowerCase();
+
+            $('table.table1 tbody tr').each(function () {
+              const row = $(this);
+              let targetText = '';
+
+              // 열 인덱스: 0:입고코드, 1:상태, 2:자재코드, 3:자재명, ...
+              if (option === '1') {
+                targetText = row.find('td:eq(0)').text().toLowerCase(); // 입고코드
+              } else if (option === '2') {
+                targetText = row.find('td:eq(3)').text().toLowerCase(); // 자재명
+              } else if (option === '3') {
+                targetText = row.find('td:eq(1)').text().toLowerCase(); // 상태
+              } else {
+                row.show(); // 선택 안 했으면 전부 보이게
+                return;
+              }
+
+              if (targetText.includes(keyword)) {
+                row.show();
+              } else {
+                row.hide();
+              }
+            });
+          });
+    });
+</script>
+<body>
+
+    <!-- header 헤더 시작 -->
+    <header id="header">   
+
+        <div class="h_wrap">
+            <div class="h_inner center">
+                <!-- header 로고 영역 -->
+                <a href="index.html">
+                    <h1 class="tit_h1">
+                        <span class="blind">ERP SPARK</span>
+                    </h1>
+                </a>
+                <!-- header 로고 영역 -->
+
+                <!-- header gnb 영역 -->
+                <ul class="gnb">
+                    <li>
+                        <a href="#none">작업 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">완제품 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">출고 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">자재 재고 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">거래처 관리</a>
+                    </li>
+                    <li>
+                        <a href="#none">마이페이지</a>
+                    </li>
+                </ul>
+                <!-- header gnb 영역 -->
+
+                <!-- header snb 영역 -->
+                <div class="snb">
+                    <a href="#none">김철수님</a>
+                </div>
+                <!-- header snb 영역 -->
+            </div>
+        </div>
+    </header>
+    <!-- header 헤더 끝 -->
+
+    <!-- section 컨텐츠 영역 시작 -->
+    <section id="section">
+        <!-- 죄측 메뉴바 시작 -->
+        <aside id="aside">
+            <ul>
+                <li class="menu01">
+                    <a href="#none">작업 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">작업 지시 목록</a>
+                        </li>
+                        <li>
+                            <a href="#none">작업 지시 등록</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu01">
+                    <a href="#none">완제품 재고 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">완제품 재고 목록</a>
+                        </li>
+                        <li>
+                            <a href="#none">완제품 재고 등록</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="menu01">
+                    <a href="#none">출고 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">출고 목록</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu01">
+                    <a href="#none">자재 재고 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">자재 재고 목록</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu01">
+                    <a href="#none">거래처 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">거래처 목록</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="menu01">
+                    <a href="#none">마이페이지</a>
+                </li>
+            </ul>
+        </aside>
+        <!-- 죄측 메뉴바 끝 -->
+
+        <!-- 컨텐츠 영역 시작 -->
+        <div id="contents">
+            <div class="con_title">
+                <h2>자재 목록</h2>
+            </div>
+            <div class="con_top_wrap flex_between">
+                <div class="search_wrap">
+                    <div class="select_box">
+                        <select>
+                            <option value="0" selected>선택하세요.</option>
+                            <option value="1" >입고 코드</option>
+                            <option value="2" >자재명</option>
+                            <option value="3" >상태</option>
+                        </select>
+                    </div>
+                    <div class="search_box">
+                        <input type="search" id="searchInput">
+                        <button class="blue_btn" id="searchBtn" onClick="">검색</button>
+                    </div>
+                </div>
+                <div class="top_button">
+                    <button type="button" class="blue_btn" onClick="">선택 입고</button>
+                </div>
+            </div>
+            <div class="table_wrap">
+                <table class="table1">
+                    <colgroup>
+                        <col width="10%"/>    
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>입고 코드</th>
+                            <th>상태</th>
+                            <th>자재 코드</th>
+                            <th>자재명</th>
+                            <th>수량</th>
+                            <th>거래처명</th>
+                            <th>출하창고명</th>
+                            <th>등록일</th>
+                            <th>담당자</th>
+                            <th>입고</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>STI1001</td>                            
+                            <td style="color:red;">입고 대기</td>
+                            <td>MAT1001</td>
+                            <td>알루미늄</td>
+                            <td>100개</td>
+                            <td>(주)메가트로닉스</td>
+                            <td>본사 1창고</td>
+                            <td>2025-07-05</td>
+                            <td>김미혜</td>
+                            <td>
+                                <button type="button" id="openModalBtn" class="openModalBtn blue_btn" onClick="">발주</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>STI1002</td>                            
+                            <td style="color:blue;">입고 완료</td>
+                            <td>MAT1001</td>
+                            <td>알루미늄</td>
+                            <td>100개</td>
+                            <td>(주)메가트로닉스</td>
+                            <td>본사 1창고</td>
+                            <td>2025-07-05</td>
+                            <td>김미혜</td>
+                            <td>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>STI1003</td>                            
+                            <td style="color:yellow;">입고중</td>
+                            <td>MAT1001</td>
+                            <td>알루미늄</td>
+                            <td>100개</td>
+                            <td>(주)메가트로닉스</td>
+                            <td>본사 1창고</td>
+                            <td>2025-07-05</td>
+                            <td>김미혜</td>
+                            <td>
+                                <button type="button" id="openModalBtn" class="openModalBtn blue_btn" onClick="">발주</button>
+                            </td>
+                        </tr>
+                      
+                     	<tr th:each="order : ${orderList}">
+						    <td th:text="${order.reasonCode}"></td>
+						    <td th:text="${order.matCode}"></td>
+						    <td th:text="${order.matName}"></td>
+						    <td th:text="${order.qtyWithUnit}"></td>
+						    <td th:text="${order.clientName}"></td>
+						    <td th:text="${order.Wnm}"></td>
+						    <td th:text="${order.orderDueDate}"></td>
+						    <td th:text="${order.manager}"></td>
+						</tr>
+												
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지 시작 -->
+            <div class="div_page flex_center">
+                <!-- 처음 버튼 -->
+                <a href="#none">
+                    <img src="/images/page_first.svg" alt="처음 버튼">
+                </a>
+                <!-- 처음 버튼 -->
+
+                <!-- 이전 버튼 -->
+                <a href="#none">
+                    <img src="/images/page_prev.svg" alt="처음 버튼">
+                </a>
+                <!-- 이전 버튼 -->
+                 
+                <!-- 페이지 번호 -->
+                <a href="#none" class="page_num">
+                    <p class="flex_center">1</p>
+                </a>
+                <a href="#none" class="page_num">
+                    <p class="flex_center">2</p>
+                </a>
+                <a href="#none" class="page_num">
+                    <p class="flex_center">3</p>
+                </a>
+                <!-- 페이지 번호 -->
+
+                <!-- 다음 버튼 -->
+                <a href="#none">
+                    <img src="/images/page_next.svg" alt="처음 버튼">
+                </a>
+                <!-- 다음 버튼 -->
+
+                <!-- 끝 버튼 -->
+                <a href="#none">
+                    <img src="/images/page_last.svg" alt="처음 버튼">
+                </a>
+                <!-- 끝 버튼 -->
+
+            </div>
+            <!-- 페이지 끝 -->
+
+        </div>
+        <!-- 컨텐츠 영역 끝 -->
+    </section>
+    <!-- section 컨텐츠 영역 끝 -->
+
+
+    
+    <!-- modal 시작 -->
+    <div id="requestOrder_modal" class="modal_container hidden">
+        <div id="modal_con" class="modal_con2 center">
+            <div class="modal_header">
+                <h2>입고 신청서</h2>
+                <button type="button" id="closeModalBtn">
+                    <img src="images/modalClose_btn.svg" alt="모달 닫기 버튼">
+                </button>
+            </div>
+            <div class="modal_body">
+                <div class="table_wrap">
+                    <table class="table2" style="width: 100%;">
+                    <tr>
+                        <th>
+                            <label>입고 코드</label>
+                        </th>
+                        <td>
+                            <input type="text" value="${reasonCode}" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>자재명</label>
+                        </th>
+                        <td>
+                            <input type="text" value="알루미늄 케이스" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>수량</label>
+                        </th>
+                        <td>
+                            <input type="text" placeholder="입고 수량을 입력하세요.">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>입고 사유 선택</label>
+                        </th>
+                        <td class="select_box">
+                            <select>
+                                <option value="0" selected>입고 사유를 선택하세요.</option>
+                                <option value="1">신규 자재 입고</option>
+                                <option value="2">불량 자재 입고</option>
+                                <option value="3">반품 입고</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>입고 사유 상세 입력</label>
+                        </th>
+                        <td>
+                            <textarea></textarea>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+            </div>
+            <div class="under_btn_wrap flex_center">
+                <button type="button" class="blue_btn" onClick="">입고</button>
+                <button type="button" id="cancelModalBtn" class="blue_border_btn" onClick="location='/stockIn/stockInList'">취소</button>
+            </div>
+        </div>
+    </div>
+    <!-- modal 끝 -->
+
+
+</body>
+</html>
