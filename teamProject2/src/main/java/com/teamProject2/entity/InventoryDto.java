@@ -22,7 +22,7 @@ public class InventoryDto {
 
     @Id
     @Column
-    private int iccode;
+    private int icode;
 
     @Column(length = 10, nullable = false)
     private String iname;

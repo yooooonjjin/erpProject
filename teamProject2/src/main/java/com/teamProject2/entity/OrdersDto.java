@@ -24,8 +24,8 @@ public class OrdersDto {
     private String ogubun;  // 구분 (ORD, STI)
 
     @Id
-    @Column(name = "OCCODE")
-    private Integer occode;  // 발주서/입고서 행번호
+    @Column(name = "OCODE")
+    private Integer ocode;  // 발주서/입고서 행번호
 
     @Column(name = "OUPRC", nullable = false)
     private Integer ouprc;  // 단가

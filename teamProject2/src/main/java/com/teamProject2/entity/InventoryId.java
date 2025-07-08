@@ -12,18 +12,18 @@ public class InventoryId implements Serializable {
     public InventoryId() {}
 
     // 생성자
-    public InventoryId(int iccode, String igubun) {
-        this.icode = iccode;
+    public InventoryId(int icode, String igubun) {
+        this.icode = icode;
         this.igubun = igubun;
     }
 
     // Getter, Setter
-    public int getIccode() {
+    public int getIcode() {
         return icode;
     }
 
-    public void setIccode(int iccode) {
-        this.icode = iccode;
+    public void setIcode(int icode) {
+        this.icode = icode;
     }
 
     public String getIgubun() {
