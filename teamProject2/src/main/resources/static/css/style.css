@@ -19,6 +19,34 @@ form{
 }
 /* 공통 버튼 css 끝 */
 
+/* 데이터피커 css 시작 */
+.ui-datepicker {
+  width: 200px !important;     
+  font-size: 16px;           
+  padding: 0.8em 1em;        
+  box-sizing: border-box;     
+}
+.ui-datepicker td a {
+  display: block;
+  width: 100%;
+  height: 2.5em;
+  line-height: 2.5em;
+  text-align:center;
+}
+.ui-datepicker-header {
+  text-align: center;
+  padding: 0.5em 0;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+.ui-datepicker select.ui-datepicker-month,
+.ui-datepicker select.ui-datepicker-year {
+  font-size: 1em;
+  padding: 0.2em;
+  margin: 0 0.2em;
+} 
+/* 데이터피커 css 끝 */
+
 /* flex css 시작 */
 .flex_start {
     display: flex;
@@ -83,6 +111,21 @@ input[type="text"], select, textarea {
 	color: #fff;
 	transition: 0.3s;
 }
+.div_page .page_num.active {
+    background-color: #2563eb;
+    color: #fff;
+    transition: 0.3s;
+}
+
+.div_page a.disabled {
+    pointer-events: none;  /* 클릭 무시 */
+}
+.div_page a.disabled img {
+    opacity: 0.4; 
+    transition: 0.3s;
+}
+
+
 /* 페이징 css 끝 */
 
 
@@ -225,13 +268,18 @@ input[type="text"], select, textarea {
     font-weight: 500;
     color: #333;
 }
+#contents .con_top_wrap {
+	padding: 20px 0 10px 0;
+}
 #contents .con_top_wrap .search_wrap {
+    width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
 }
 #contents .con_top_wrap .search_wrap .select_box {
-    width: 220px;
+    width: 15%;
     position: relative;
 }
 #contents .con_top_wrap .search_wrap .select_box select {
@@ -240,7 +288,7 @@ input[type="text"], select, textarea {
     border: 1px solid #d1d1d1;
     border-radius: 6px;
     font-size: 1.4rem;
-    color: #d1d1d1;
+    color: #666;
 }
 #contents .con_top_wrap .search_wrap .select_box::after {
     content: "";
@@ -253,23 +301,25 @@ input[type="text"], select, textarea {
     top: 50%;
     transform: translateY(-50%);
 }
-#contents .con_top_wrap .search_wrap .search_box {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-#contents .con_top_wrap .search_wrap .search_box input[type="search"] {
-    width: 300px;
+#contents .con_top_wrap .search_wrap input[type="search"] {
+    width: 25%;
     border: 1px solid #d1d1d1;
     padding: 9px 16px;
     border-radius: 6px;
     font-size: 1.4rem;
-    color: #d1d1d1;
+    color: #666;
 }
-#contents .con_top_wrap .top_button {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+#contents .con_top_wrap .search_wrap input[type="text"] {
+    width: 15%;
+    border: 1px solid #d1d1d1;
+    padding: 10px;
+    border-radius: 6px;
+    background: url(img/date_icon.svg) no-repeat right 10px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+}
+#contents .con_top_wrap .search_wrap button {
+    width: 5%;
 }
 .table1 img {
     width: 70px;
@@ -298,9 +348,8 @@ input[type="text"], select, textarea {
 	font-size: 1.4rem;
     color: #333;
     font-weight: lighter;
-    background: #fff;
 	border-bottom: 1px solid #e1e1e1;
-    padding: 10px 0;
+    padding: 15px 0;
 }
 .table1 input[type="text"] {
     width: 90%;
@@ -330,7 +379,7 @@ input[type="text"], select, textarea {
     transform: translateY(-50%);
 }
 .table1 button {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
 }
 .table1 .date_box {
     position: relative;
@@ -429,19 +478,108 @@ input[type="text"], select, textarea {
     top: 50%;
     transform: translateY(-50%);
 }
+
+
+.statusWaiting {
+	background-color: #fff2de; 
+	font-size: 1.4rem;
+    color: #FF9800;
+}
+.statusApproved {
+		background-color: #f2f2fd;
+	font-size: 1.4rem;
+    color: #00f;
+}
+.statusRejected {
+	background-color: #ffe5e5; 
+	font-size: 1.4rem;
+    color: #f00; 
+}
 /* contents css 끝 */
 
-/* 작업지시 상태값 버튼 css 시작 */
-.table1 .waiting {
+
+
+/* 발주서 css 시작 */
+.orderForm .ord_title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.orderForm .ord_title p {
+    font-size: 2.6rem;
+    color: #333;
+    font-weight: 500;
+}
+.orderForm .ord_title .ordR {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+}
+.orderForm .ord_title .ordR p {
+    font-size: 1.6rem;
+    color: #333;
+    font-weight: 400;
+}
+.orderForm .ord_top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.orderForm .ord_tcon {
+    width: 49%;
+}
+.orderForm .ord_tcon p {
+    font-size: 2.0rem;
+    color: #333;
+    font-weight: 500;
+    padding: 10px 0;
+}
+.orderForm .table3 {
+    width: 100%;
+    border-top: 2px solid #000;
+    border-collapse: collapse;
+}
+.orderForm .table3 th {
+    width: 30%;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: #000;
+    padding: 15px 10px;
+    border-bottom: 1px solid #e1e1e1;
+    border-right: 1px solid #e1e1e1;
+}
+.orderForm .table3 td {
+    font-size: 1.6rem;
+    font-weight: 400;
     color: #666;
-    font-weight: 500;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e1e1e1;
 }
-.table1 .progress {
-    color: #f00;
+.table1 .table_total td {
     font-weight: 500;
+     color: #333;
 }
-.table1 .completed {
-    color: #00f;
-    font-weight: 500;
+.ord_content {
+    padding: 50px 0;
 }
-/* 작업지시 상태값 버튼 css 끝 */
+.ord_ucon {
+    width: 100%;
+}
+.ord_ucon .table3 th {
+    width: 15%;
+}
+.ord_ucon .table3 textarea {
+    width: 100%;
+    border: 1px solid #d1d1d1;
+    padding: 15px;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    color: #666;
+    height: 150px;	
+    overflow-y: scroll;
+    outline: none;
+}
+
+/* 발주서 css 끝 */
