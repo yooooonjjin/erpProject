@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ERP 로그인</title>
+	<link rel="stylesheet" href="css/login.css" />
+	<link rel="stylesheet" href="css/jquery-ui.css" />
+	<script src="js/jquery-3.7.1.min.js"></script>
+	<script src="js/jquery-ui.js"></script>
+	<script src="js/main.js"></script>
+</head>
+<body>
+	<div id="loginBox">
+        <div class="loginImg">
+            <div class="logo">
+                <p>ERP</p>
+                <p>SPARK</p>
+            </div>
+        </div>
+        <div class="loginInner login_center">
+        	<form th:action="@{/login}" method="post">
+	            <p class="login_header">ERP SPARK</p>
+	            <div class="login_container">
+	                <p>로그인</p>
+	                <div class="inputWrap">
+	                
+	                    <div class="login_input">
+	                        <label>사원번호</label>
+	                        <input type="text" name="ecode" placeholder="사원번호를 입력하세요.">
+	                    </div>
+	                    <div class="login_input">
+	                        <label>사원이름</label>
+	                        <input type="text" name="ename" placeholder="이름을 입력하세요.">
+	                    </div>
+	                </div>
+	            </div>
+	            <button type="submit" class="blue_btn">로그인</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
