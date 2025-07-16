@@ -1,31 +1,28 @@
 package com.teamProject2.controller;
 
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.jaxb.SpringDataJaxb.OrderDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.teamProject2.entity.ClientDto;
 import com.teamProject2.entity.OrdersDto;
-import com.teamProject2.service.OrderService;
+import com.teamProject2.service.OrdersService;
 
 @RestController
 @RequestMapping("/order")
-public class OrderController {
+public class OrdersController {
 	
-	public final OrderService orderService;
-	public OrderController(OrderService orderService) {
+	public final OrdersService orderService;
+	public OrdersController(OrdersService orderService) {
 		this.orderService = orderService;
 	}
 	

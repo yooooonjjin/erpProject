@@ -26,12 +26,12 @@ import java.time.LocalDateTime;
 
 
 @Service
-public class OrderService {
+public class OrdersService {
 	
 	public final OrdersRepository ordersRepository;	
 	public final ClientRepository clientRepository;	
 	public final InventoryRepository inventoryRepository;
-	public OrderService(OrdersRepository ordersRepository,ClientRepository clientRepository,InventoryRepository inventoryRepository) {
+	public OrdersService(OrdersRepository ordersRepository,ClientRepository clientRepository,InventoryRepository inventoryRepository) {
 		this.ordersRepository = ordersRepository;
 		this.clientRepository = clientRepository;
 		this.inventoryRepository = inventoryRepository;
