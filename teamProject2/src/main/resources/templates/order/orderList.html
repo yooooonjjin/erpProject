@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ERP 프로젝트</title>
+  <link rel="stylesheet" href="css/total.css" />
+  <script src="js/jquery-3.7.1.min.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/main.js"></script>
+  <!-- jQuery UI CSS -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">	
+  <!-- jQuery UI JS -->
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+</head>
+
+<script>
+$(function () {
+    
+	$("#datepicker").datepicker({
+        dateFormat: "yy-mm-dd"
+    });
+  
+});
+</script>
+
+<body>
+
+    <!-- skip 네비게이션 영역 -->
+    <nav id="skipToContent">
+        <ul>
+            <li><a href="#container">Skip to Main Content</a></li>
+            <li><a href="#gnb">Skip to Main Menu</a></li>
+            <li><a href="#header">Skip to Upeer Menu</a></li>
+            <li><a href="#footers">Skip to Lower Menu</a></li>
+        </ul>
+    </nav>
+    <!-- skip 네비게이션 영역 -->
+
+    <!-- header 헤더 시작 -->
+    <header th:insert="~{fragments/header}">
+    </header>
+    <!-- header 헤더 끝 -->
+
+    <!-- section 컨텐츠 영역 시작 -->
+    <section id="section">
+        <!-- 죄측 메뉴바 시작 -->
+        <aside th:insert="~{fragments/aside}" id="aside">
+           
+        </aside>
+        <!-- 죄측 메뉴바 끝 -->
+
+        <!-- 컨텐츠 영역 시작 -->
+        <div id="contents">
+            <div class="con_title">
+                <h2>자재 목록</h2>
+            </div>
+            <div class="con_top_wrap">
+            <form method="get" th:action="@{/order}">
+                <div class="search_wrap">
+                
+				    <input type="text" name="ordate" id="datepicker" placeholder="날짜를 선택하세요." th:value="${ordate}">
+				    <div class="select_box">
+				        <select name="ostate">
+				            <option value="">발주 상태를 선택하세요.</option>
+				            <option value="결재 대기" th:selected="${ostate == '결재 대기'}">결재 대기</option>
+				            <option value="결재 승인" th:selected="${ostate == '결재 승인'}">결재 승인</option>
+				            <option value="결재 반려" th:selected="${ostate == '결재 반려'}">결재 반려</option>
+				        </select>
+				    </div>
+				    <input name="supcd" type="search" placeholder="공급처를 검색하세요." th:value="${supcd}">
+				    <input name="omgr" type="search" placeholder="담당자를 검색하세요." th:value="${omgr}">
+				    <input name="onote" type="search" placeholder="검색어를 입력하세요." th:value="${onote}">
+				    <button class="blue_btn">검색</button>
+				
+
+                </div>
+                </form>
+            </div>
+            <div class="table_wrap">
+                <table class="table1">
+                    <colgroup> 
+                        <col width="5%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="15%"/>
+                        <col width="15%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="*"/>
+                        
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>발주코드</th>
+                            <th>상태</th>
+                            <th>신청일자</th>
+                            <th>공급처명</th>
+                            <th>발주 담당자</th>
+                            <th>총 발주량</th>
+                            <th>특이사항</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ord, myStat : ${ordList}">
+						    <td th:text="${startPageRownum - myStat.index}"></td>
+						    <td>
+						        <a th:href="@{|/order/detail?ogubun=${ord.ogubun}&ono=${ord.ono}|}">
+						            <span th:text="${ord.ogubun + ord.ono}"></span>
+						        </a>
+						    </td>
+						    <td>
+                              <a th:href="@{|/order/detail?ono=${ord.ono}&ostate=${ord.ostate}&ogubun=${ord.ogubun}|}" th:text="${ord.ostate}"
+                           th:class="'state ' +
+                                    (${ord.ostate} == '결재 대기' ? 'statusWaiting' :
+                                 (${ord.ostate} == '결재 승인' ? 'statusApproved' :
+                                 (${ord.ostate} == '결재 반려' ? 'statusRejected' : '')))">
+
+                              </a>
+                           </td>  
+						    <td th:text="${#strings.substring(ord.ordate,0,10)}"></td>
+						    <td th:text="${supplierNameMap[ord.ono]}"></td>
+						    <td th:text="${ord.omgr}"></td>
+						    <td th:text="${orderCountMap[ord.ono.toString()]+'건'}"></td>
+						    <td th:text="${ord.onote != null ? ord.onote : '-'}"></td>
+						    
+						</tr>
+
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지 시작 -->
+            <div class="div_page flex_center">
+
+    <!-- 처음 -->
+    <a th:href="@{/order(indexpage=1, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})}"
+       th:style="${currentPage > 0} ? 'cursor:pointer' : 'cursor:default'">
+        <img src="images/page_first.svg" alt="처음 버튼">
+    </a>
+
+    <!-- 이전 -->
+    <a th:href="@{/order(indexpage=${currentPage}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})}"
+       th:style="${currentPage > 0} ? 'cursor:pointer' : 'cursor:default'">
+        <img src="images/page_prev.svg" alt="이전 버튼">
+    </a>
+
+    <!-- 번호 -->
+    <span th:each="n : ${#numbers.sequence(startPage, endPage)}">
+	    <a class="page_num"
+	       th:href="@{/order(indexpage=${n}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})}"
+	       th:classappend="${n == currentPage + 1} ? 'selected' : ''">
+	        <span class="flex_center" th:text="${n}"></span>
+	    </a>
+	</span>
+
+
+    <!-- 다음 -->
+    <a th:href="@{/order(indexpage=${currentPage + 2}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})}"
+       th:style="${currentPage + 1 < ptotalPage} ? 'cursor:pointer' : 'cursor:default'">
+        <img src="images/page_next.svg" alt="다음 버튼">
+    </a>
+
+    <!-- 마지막 -->
+    <a th:href="@{/order(indexpage=${ptotalPage}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})}"
+       th:style="${currentPage + 1 < ptotalPage} ? 'cursor:pointer' : 'cursor:default'">
+        <img src="images/page_last.svg" alt="끝 버튼">
+    </a>
+
+</div>
+            <!-- 페이지 끝 -->
+            </div>
+
+        </div>
+        <!-- 컨텐츠 영역 끝 -->
+    </section>
+    <!-- section 컨텐츠 영역 끝 -->
+
+
+    
+   
+
+<!-- JS: 화면 출력용 콤마처리 -->
+<script>
+
+	// f5 새로고침 시 검색조건 초기화
+	window.onload = function() {
+	  if(performance.navigation.type === 1) { // 1은 새로고침(F5)
+	    window.location.href = '/order'; // 쿼리 파라미터 없이 새로 이동
+	  }
+	};
+
+
+    // 숫자에 콤마 찍기 (간단 버전)
+    function numberWithCommas(x) {
+        if (!x) return '0';
+        return Number(x).toLocaleString(); 
+    }
+
+    // 페이지 로드시 숫자들에 콤마 붙이기
+    $(function() {
+        $('.comma').each(function() {
+            const raw = $(this).text().trim();
+            const formatted = numberWithCommas(raw);
+            $(this).text(formatted);
+        });
+    });
+</script>
+
+</body>
+</html>
