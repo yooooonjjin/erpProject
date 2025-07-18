@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>모달창</title>
+  <title>입고 목록</title>
   <link rel="stylesheet" href="/css/total.css" />
-  <script src="js/jquery-3.7.1.min.js"></script>
-  <script src="js/jquery.min.js"></script>
-  <script src="js/main.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <script src="/js/main.js"></script>
 </head>
 <script>
     $(function() {
-
-        $('.openModalBtn').on('click', function () {
+    	
+		$("#datepicker").datepicker({ dateFormat: "yy-mm-dd" });
+        
+		
+		$('.openModalBtn').on('click', function () {
             $('#requestOrder_modal').removeClass('hidden');
         });
 
@@ -21,33 +25,55 @@
             $('#requestOrder_modal').addClass('hidden');
         });
         
+     	// ✅ 검색 버튼 클릭 시 날짜 + 상태 필터링 실행
         $('#searchBtn').on('click', function () {
-            const option = $('#filterOption').val();
-            const keyword = $('#searchInput').val().trim().toLowerCase();
+            const selectedStatus = $('#statusFilter').val(); // 상태 select 값
+            const selectedDate = $('#datepicker').val();    // 날짜 input 값 (yyyy-mm-dd 형태)
+            const clientFilter = $('#clientFilter').val().trim(); // ✅ 공급처 필터 입력값
+            const mgrFilter = $('#mgrFilter').val().trim(); // ✅ 담당자 필터 입력값
+            
+            const url = `/stockIn/stockInList?indexPage=1&status=${selectedStatus}&date=${selectedDate}&client=${encodeURIComponent(clientFilter)}&manager=${encodeURIComponent(mgrFilter)}`;
+
+            window.location.href = url;
+
+
+            // 상태 코드 -> 텍스트 매핑 (필요하면 맞게 수정)
+            const statusTextMap = {
+            		'입고 대기': '입고 대기',
+                    '입고 완료': '입고 완료',
+                    '입고중': '입고중'            
+            };
 
             $('table.table1 tbody tr').each(function () {
-              const row = $(this);
-              let targetText = '';
+                const row = $(this);
+                const rowDate = row.find('td:eq(1)').text().trim(); // 날짜열 (발주 납기일)
+                const statusText = row.find('td:eq(2)').text().trim(); // 상태열
+                const rowClient = row.find('td:eq(6)').text().trim();       // 공급처(거래처명)
+                const rowMgr= row.find('td:eq(7)').text().trim();       // 담당자
 
-              // 열 인덱스: 0:입고코드, 1:상태, 2:자재코드, 3:자재명, ...
-              if (option === '1') {
-                targetText = row.find('td:eq(0)').text().toLowerCase(); // 입고코드
-              } else if (option === '2') {
-                targetText = row.find('td:eq(3)').text().toLowerCase(); // 자재명
-              } else if (option === '3') {
-                targetText = row.find('td:eq(1)').text().toLowerCase(); // 상태
-              } else {
-                row.show(); // 선택 안 했으면 전부 보이게
-                return;
-              }
+                const selectedDate = $('#datepicker').val();
+                
+             // 상태 매핑
+                const statusMatch = (selectedStatus === '' || statusText === selectedStatus); // 상태 필터링
+                const dateMatch = !selectedDate || (rowDate === selectedDate);
+                const clientMatch = !clientFilter || rowClient.toLowerCase().includes(clientFilter.toLowerCase());
+                const mgrMatch = !mgrFilter || rowMgr.includes(mgrFilter);
 
-              if (targetText.includes(keyword)) {
-                row.show();
-              } else {
-                row.hide();
-              }
+				
+
+				function normalizeDate(dateStr) {
+					  // 공백 제거 및 yyyy-MM-dd 포맷 맞추기
+					  return dateStr.split(' ')[0];
+					}
+					
+	                if (dateMatch && statusMatch && clientMatch && mgrMatch) {
+	                    row.show();
+	                } else {
+	                    row.hide();
+	                }
+          
             });
-          });
+        });
     });
 </script>
 <body>
@@ -164,108 +190,77 @@
         <!-- 컨텐츠 영역 시작 -->
         <div id="contents">
             <div class="con_title">
-                <h2>자재 목록</h2>
+                <h2>입고 목록</h2>
             </div>
-            <div class="con_top_wrap flex_between">
+            <div class="con_top_wrap">
                 <div class="search_wrap">
-                    <div class="select_box">
-                        <select>
-                            <option value="0" selected>선택하세요.</option>
-                            <option value="1" >입고 코드</option>
-                            <option value="2" >자재명</option>
-                            <option value="3" >상태</option>
-                        </select>
-                    </div>
-                    <div class="search_box">
-                        <input type="search" id="searchInput">
-                        <button class="blue_btn" id="searchBtn" onClick="">검색</button>
-                    </div>
+                    <form id="searchForm" method="get" th:action="@{/stockIn/stockInList}">
+					    <input type="text" id="datepicker" name="date" th:value="${date}" placeholder="날짜를 선택하세요.">
+					    <select id="statusFilter" name="status">
+					        <option value="">발주 상태를 선택하세요.</option>
+						    <option value="입고 대기" th:selected="${status == '입고 대기'}">입고 대기</option>
+						    <option value="입고 완료" th:selected="${status == '입고 완료'}">입고 완료</option>
+						    <option value="입고중" th:selected="${status == '입고중'}">입고중</option>
+					    </select>
+					    <input type="text" id="clientFilter" name="client" th:value="${client}" placeholder="공급처를 검색하세요.">
+					    <input type="text" id="mgrFilter" name="manager" th:value="${manager}" placeholder="담당자를 검색하세요.">
+					    <input type="search" placeholder="검색어를 입력하세요.">
+					    <button class="blue_btn" type="submit">검색</button>
+					</form>
                 </div>
-                <div class="top_button">
-                    <button type="button" class="blue_btn" onClick="">선택 입고</button>
-                </div>
+            
             </div>
             <div class="table_wrap">
                 <table class="table1">
                     <colgroup>
                         <col width="10%"/>    
                         <col width="10%"/>
+                        <col width="15%"/>
                         <col width="10%"/>
                         <col width="10%"/>
-                        <col width="10%"/>
-                        <col width="10%"/>
-                        <col width="10%"/>
-                        <col width="10%"/>
+                        <col width="15%"/>
                         <col width="10%"/>
                         <col width="10%"/>
                     </colgroup>
                     <thead>
                         <tr>
                             <th>입고 코드</th>
+                            <th>발주 납기일</th>
                             <th>상태</th>
                             <th>자재 코드</th>
                             <th>자재명</th>
                             <th>수량</th>
                             <th>거래처명</th>
-                            <th>출하창고명</th>
-                            <th>등록일</th>
                             <th>담당자</th>
                             <th>입고</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>STI1001</td>                            
-                            <td style="color:red;">입고 대기</td>
-                            <td>MAT1001</td>
-                            <td>알루미늄</td>
-                            <td>100개</td>
-                            <td>(주)메가트로닉스</td>
-                            <td>본사 1창고</td>
-                            <td>2025-07-05</td>
-                            <td>김미혜</td>
-                            <td>
-                                <button type="button" id="openModalBtn" class="openModalBtn blue_btn" onClick="">발주</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>STI1002</td>                            
-                            <td style="color:blue;">입고 완료</td>
-                            <td>MAT1001</td>
-                            <td>알루미늄</td>
-                            <td>100개</td>
-                            <td>(주)메가트로닉스</td>
-                            <td>본사 1창고</td>
-                            <td>2025-07-05</td>
-                            <td>김미혜</td>
-                            <td>
-                            </td>
-                        </tr>
-                        
-                        <tr>
-                            <td>STI1003</td>                            
-                            <td style="color:yellow;">입고중</td>
-                            <td>MAT1001</td>
-                            <td>알루미늄</td>
-                            <td>100개</td>
-                            <td>(주)메가트로닉스</td>
-                            <td>본사 1창고</td>
-                            <td>2025-07-05</td>
-                            <td>김미혜</td>
-                            <td>
-                                <button type="button" id="openModalBtn" class="openModalBtn blue_btn" onClick="">발주</button>
-                            </td>
-                        </tr>
-                      
-                     	<tr th:each="order : ${orderList}">
-						    <td th:text="${order.reasonCode}"></td>
-						    <td th:text="${order.matCode}"></td>
-						    <td th:text="${order.matName}"></td>
-						    <td th:text="${order.qtyWithUnit}"></td>
-						    <td th:text="${order.clientName}"></td>
-						    <td th:text="${order.Wnm}"></td>
-						    <td th:text="${order.orderDueDate}"></td>
-						    <td th:text="${order.manager}"></td>
+                    
+                     	<tr th:each="row : ${orderList}">
+						    <td th:text="${row.reasonCode}"></td> <!-- 입고 코드 -->
+						    <td th:text="${#dates.format(row.odate, 'yyyy-MM-dd')}"></td>
+						    <td>
+                              <a th:text="${row.stateText}" 
+				       th:class="'state ' +
+				       (${row.stateText} == '입고 대기' ? 'statusWaiting' :
+				       (${row.stateText} == '입고 완료' ? 'statusApproved' :
+				       (${row.stateText} == '입고중' ? 'statusInProgress' : '')))">
+				    </a>
+                           </td>  
+						    <td th:text="${row.matCode}"></td> <!-- 자재 코드 -->
+						    <td th:text="${row.matName}"></td> <!-- 자재명 -->
+						    <td th:text="${row.qtyWithUnit}"></td> <!-- 수량 + 단위 -->
+						    <td th:text="${row.clientName}"></td> <!-- 거래처명 -->
+						    <td th:text="${row.manager}"></td> <!-- 담당자 -->
+						    <td>
+						         <button type="button" class="openModalBtn blue_btn" 
+					                th:if="${row.stateText != '입고 완료'}"
+					                th:data-reasonCode="${row.reasonCode.substring(3)}" 
+					                onclick="location.href='/stockIn/stockInDetail/' + this.getAttribute('data-reasonCode')">
+        입고</button>	<!-- 입고가 아직 완료되지 않은 항목만 "입고" 버튼 -->
+						                
+						    </td>
 						</tr>
 												
                     </tbody>
@@ -275,40 +270,40 @@
             <!-- 페이지 시작 -->
             <div class="div_page flex_center">
                 <!-- 처음 버튼 -->
-                <a href="#none">
-                    <img src="/images/page_first.svg" alt="처음 버튼">
-                </a>
-                <!-- 처음 버튼 -->
-
-                <!-- 이전 버튼 -->
-                <a href="#none">
-                    <img src="/images/page_prev.svg" alt="처음 버튼">
-                </a>
-                <!-- 이전 버튼 -->
-                 
-                <!-- 페이지 번호 -->
-                <a href="#none" class="page_num">
-                    <p class="flex_center">1</p>
-                </a>
-                <a href="#none" class="page_num">
-                    <p class="flex_center">2</p>
-                </a>
-                <a href="#none" class="page_num">
-                    <p class="flex_center">3</p>
-                </a>
-                <!-- 페이지 번호 -->
-
-                <!-- 다음 버튼 -->
-                <a href="#none">
-                    <img src="/images/page_next.svg" alt="처음 버튼">
-                </a>
-                <!-- 다음 버튼 -->
-
-                <!-- 끝 버튼 -->
-                <a href="#none">
-                    <img src="/images/page_last.svg" alt="처음 버튼">
-                </a>
-                <!-- 끝 버튼 -->
+			   <a th:href="@{'?indexPage=1'}">
+			        <img src="/images/page_first.svg" alt="처음 버튼">
+			    </a>
+			
+			    <!-- 이전 버튼 -->
+			    <a th:href="@{/stockIn/stockInList(indexPage=${page > 1 ? page - 1 : 1})}">
+			        <img src="/images/page_prev.svg" alt="이전 버튼">
+			    </a>
+			
+			    <!-- 여러 페이지일 때 -->
+				<span th:if="${totalPages > 1}" th:each="n : ${#numbers.sequence(1, totalPages)}">
+				    <a th:href="@{/stockIn/stockInList(indexPage=${n}, status=${status}, client=${client}, manager=${manager}, date=${date})}"
+				       th:classappend="${n == page} ? ' on'">
+				        <p class="flex_center" th:text="${n}"></p>
+				    </a>
+				</span>
+				
+				<!-- 한 페이지만 있을 때 -->
+				<span th:if="${totalPages == 1}">
+				    <a th:href="@{/stockIn/stockInList(indexPage=1, status=${status}, client=${client}, manager=${manager}, date=${date})}" class="on">
+				        <p class="flex_center">1</p>
+				    </a>
+				</span>
+				
+			
+			    <!-- 다음 버튼 -->
+			    <a th:href="@{'?indexPage=' + (${page} < ${totalPages} ? ${page + 1} : ${totalPages})}">
+			        <img src="/images/page_next.svg" alt="다음 버튼">
+			    </a>
+			
+			    <!-- 끝 버튼 -->
+			    <a th:href="@{'?indexPage=' + ${totalPages}}">
+			        <img src="/images/page_last.svg" alt="끝 버튼">
+			    </a>
 
             </div>
             <!-- 페이지 끝 -->
@@ -318,75 +313,6 @@
     </section>
     <!-- section 컨텐츠 영역 끝 -->
 
-
-    
-    <!-- modal 시작 -->
-    <div id="requestOrder_modal" class="modal_container hidden">
-        <div id="modal_con" class="modal_con2 center">
-            <div class="modal_header">
-                <h2>입고 신청서</h2>
-                <button type="button" id="closeModalBtn">
-                    <img src="images/modalClose_btn.svg" alt="모달 닫기 버튼">
-                </button>
-            </div>
-            <div class="modal_body">
-                <div class="table_wrap">
-                    <table class="table2" style="width: 100%;">
-                    <tr>
-                        <th>
-                            <label>입고 코드</label>
-                        </th>
-                        <td>
-                            <input type="text" value="${reasonCode}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>자재명</label>
-                        </th>
-                        <td>
-                            <input type="text" value="알루미늄 케이스" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>수량</label>
-                        </th>
-                        <td>
-                            <input type="text" placeholder="입고 수량을 입력하세요.">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>입고 사유 선택</label>
-                        </th>
-                        <td class="select_box">
-                            <select>
-                                <option value="0" selected>입고 사유를 선택하세요.</option>
-                                <option value="1">신규 자재 입고</option>
-                                <option value="2">불량 자재 입고</option>
-                                <option value="3">반품 입고</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>입고 사유 상세 입력</label>
-                        </th>
-                        <td>
-                            <textarea></textarea>
-                        </td>
-                    </tr>
-                </table>
-                </div>
-            </div>
-            <div class="under_btn_wrap flex_center">
-                <button type="button" class="blue_btn" onClick="">입고</button>
-                <button type="button" id="cancelModalBtn" class="blue_border_btn" onClick="location='/stockIn/stockInList'">취소</button>
-            </div>
-        </div>
-    </div>
-    <!-- modal 끝 -->
 
 
 </body>

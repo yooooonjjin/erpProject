@@ -21,5 +21,17 @@ public class ClientService {
 	public List<ClientDto> supList(){
 		return clientRepository.findAll();
 	}
+	
+	/**
+	 * 수경
+	 */
+	
+	public List<ClientDto> getSuppliers() {
+        return clientRepository.findByCgubun("sup");
+    }
+	
+	/**
+	 *  끝
+	 */
 
 }

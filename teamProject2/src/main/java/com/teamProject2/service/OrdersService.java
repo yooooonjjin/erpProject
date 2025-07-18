@@ -10,11 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.teamProject2.entity.ReasonDto;
 import com.teamProject2.entity.ClientDto;
 import com.teamProject2.entity.OrdersDto;
 import com.teamProject2.repository.ClientRepository;
 import com.teamProject2.repository.InventoryRepository;
 import com.teamProject2.repository.OrdersRepository;
+import com.teamProject2.repository.ReasonRepository;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,10 +33,12 @@ public class OrdersService {
 	public final OrdersRepository ordersRepository;	
 	public final ClientRepository clientRepository;	
 	public final InventoryRepository inventoryRepository;
-	public OrdersService(OrdersRepository ordersRepository,ClientRepository clientRepository,InventoryRepository inventoryRepository) {
+	public final ReasonRepository reasonRepository;
+	public OrdersService(OrdersRepository ordersRepository,ClientRepository clientRepository,InventoryRepository inventoryRepository,ReasonRepository reasonRepository) {
 		this.ordersRepository = ordersRepository;
 		this.clientRepository = clientRepository;
 		this.inventoryRepository = inventoryRepository;
+		this.reasonRepository = reasonRepository;
 	}
 	
 	/**
@@ -509,6 +513,62 @@ public class OrdersService {
     		return ordersRepository.updateDelst(ono, ogubun);
     	}
 
+    	
+    	// 입고
+    	// 입고 코드 생성 (ogubun + ono 형태로)
+    	public String generateNextReasonCode(int ocode) {
+    	    // 입고 코드 생성 로직 확인
+    	    String reasonCode = "STI" + String.format("%04d", ocode);  // 예시로 ocode 기반 입고 코드 생성
+    	    return reasonCode;
+    	}
+
+    	public Page<Object[]> getFilteredOrders(String status, String client, String manager, String date, Pageable pageable) {
+    	    return ordersRepository.findFilteredOrders(status, client, manager, date, pageable);
+    	}
+    	
+    	// 입고 명세서 데이터
+    	public List<Map<String, Object>> getStockInData() {
+    		 // 입고 데이터를 조회하는 쿼리
+    	    List<Object[]> rows = ordersRepository.findStockInData();
+    	    List<Map<String, Object>> result = new ArrayList<>();
+
+    	    for (Object[] row : rows) {
+    	        Map<String, Object> map = new HashMap<>();
+    	        String iname = (String) row[0];
+    	        String ownm = (String) row[1];
+    	        Integer ouprc = ((Number) row[2]).intValue();
+    	        Integer oqty = ((Number) row[3]).intValue();
+    	        Integer supply = ouprc * oqty;
+    	        Integer tax = (int) (supply * 0.1);
+
+    	        map.put("iname", iname);
+    	        map.put("status", "가용");
+    	        map.put("ownm", ownm);
+    	        map.put("ouprc", ouprc);
+    	        map.put("oqty", oqty);
+    	        map.put("stiqty", oqty); // 처음엔 입고수량 = 발주수량
+    	        map.put("supply", supply);
+    	        map.put("tax", tax);
+
+    	        result.add(map);
+    	    }
+
+    	    return result;
+    	}
+
+    	public void saveAll(List<OrdersDto> data) {
+            ordersRepository.saveAll(data);
+        }
+
+    	    public List<OrdersDto> findAll() {
+    	        return ordersRepository.findAll();
+    	    }
+    	    
+    	    public OrdersDto getOrdersByOcode(int ocode) {
+    	        return ordersRepository.findByOcode(ocode); // ocode로 주문 데이터 조회
+    	    }
+
+    	   
 
 
 } 

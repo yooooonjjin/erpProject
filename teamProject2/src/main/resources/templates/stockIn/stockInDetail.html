@@ -3,21 +3,108 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>상세보기</title>
-  <link rel="stylesheet" href="css/total.css" />
-  <link rel="stylesheet" href="css/jquery-ui.css" />
-  <script src="js/jquery-3.7.1.min.js"></script>
-  <script src="js/jquery.min.js"></script>
-  <script src="js/jquery-ui.js"></script>
-  <script src="js/main.js"></script>
-</head>
+  <title>입고 명세서</title>
+  <link rel="stylesheet" href="/css/total.css" />
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <script src="/js/main.js"></script>
 <script>
-    $(function () {
-        $("#datepicker").datepicker({
-            dateFormat: "yy-mm-dd"
-        });
+$(function() {
+
+    $('.openModalBtn').on('click', function () {
+        $('#requestOrder_modal').removeClass('hidden');
     });
+
+    // 모달 닫기 버튼
+    $('#closeModalBtn, #cancelModalBtn').on('click', function () {
+        $('#requestOrder_modal').addClass('hidden');
+    });
+    
+    $(document).on('input', '.stiQtyInput', calcTotals);
+
+    // 페이지 로드 후 한 번 계산
+    $(document).ready(calcTotals);
+
+    // "불용" 상태 체크 후 자재명 자동 설정
+    $('.blue_btn').on('click', function () {
+        let hasDisuse = false;
+        let disuseItemName = '';  // 자재명 변수
+        let stockList = [];
+
+        $('#stockBody tr').each(function () {
+            const status = $(this).find('td:eq(2) select option:selected').text().trim();
+            const itemName = $(this).find('td:eq(1)').text();  // 자재명
+            const qty = $(this).find('.stiQtyInput').val();
+
+            if (status === '불용') {
+                hasDisuse = true;
+                disuseItemName = itemName;  // 자재명 저장
+                return false;  // 첫 번째 불용 아이템에서만 멈추기
+            }
+        });
+
+        if (hasDisuse) {
+            // 모달 열기 및 자재명 자동 입력
+            $('#requestOrder_modal').removeClass('hidden');
+            $('#requestOrder_modal input.readonly').eq(1).val(disuseItemName);  // 자재명 설정
+        } else {
+            // 서버에 입고 등록 요청 후 리스트로 이동
+            // 👉 여기에 form 전송이나 fetch, AJAX로 처리
+            location.href = '/stockIn/stockInList'; // 예시
+        }
+    });
+
+ // 불용 사유 저장 버튼 클릭 시
+   $('#reasonSubmitBtn').on('click', function () {
+    const reason = {
+        rgubun: "str",
+        rname: $('#requestOrder_modal input.readonly').eq(1).val(),  // 자재명
+        rdetail: $('select option:selected').text(),  // 불용 사유
+        rnote: $('textarea').val(),  // 추가적인 사유
+        rstate: "등록",
+        sticd: 1 // 입고코드 (필요 시 동적 바인딩)
+    };
+
+    $.ajax({
+        type: "POST",
+        url: "/stockIn/insertReason",  // 서버에서 정의한 URL 경로와 일치해야 합니다.
+        contentType: "application/json",
+        data: JSON.stringify(reason),
+        success: function () {
+            alert("불용 사유 저장 완료");
+
+            // 불용 사유 저장 후 상태 변경을 반영하기 위한 AJAX 요청
+            $.ajax({
+                type: "POST",
+                url: "/stockIn/complete",  // 입고 완료 상태로 변경하는 API 호출
+                contentType: "application/json",
+                data: JSON.stringify({ ocode: reason.sticd }), // 입고 코드 전달
+                success: function (response) {
+                    // 상태가 "입고 완료"로 변경되었으므로 버튼 숨기기
+                    $('tr[data-ocode="' + reason.sticd + '"] .stockInBtn').hide();
+                    // 상태 텍스트 업데이트
+                    $('tr[data-ocode="' + reason.sticd + '"] td.stateText').text("입고 완료");
+                    // 입고 목록 페이지로 리디렉션
+                    window.location.href = '/stockIn/stockInList';  // 목록 페이지로 이동
+                },
+                error: function () {
+                    alert("입고 완료 처리 실패");
+                }
+            });
+        },
+        error: function () {
+            alert("저장 실패");
+        }
+				});
+
+    		
+	});
+});
+    
 </script>
+
+</head>
 <body>
 
     <!-- header 헤더 시작 -->
@@ -36,19 +123,16 @@
                 <!-- header gnb 영역 -->
                 <ul class="gnb">
                     <li>
-                        <a href="#none">작업 관리</a>
+                        <a href="#none">자재 관리</a>
                     </li>
                     <li>
-                        <a href="#none">완제품 관리</a>
+                        <a href="#none">발주 관리</a>
                     </li>
                     <li>
-                        <a href="#none">출고 관리</a>
+                        <a href="#none">입고 관리</a>
                     </li>
                     <li>
-                        <a href="#none">자재 재고 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">거래처 관리</a>
+                        <a href="#none">공급처 관리</a>
                     </li>
                     <li>
                         <a href="#none">마이페이지</a>
@@ -72,56 +156,46 @@
         <aside id="aside">
             <ul>
                 <li class="menu01">
-                    <a href="#none">작업 관리</a>
+                    <a href="#none">자재 관리</a>
                     <ul class="menu02">
                         <li>
-                            <a href="#none">작업 지시 목록</a>
+                            <a href="#none">자재 목록</a>
                         </li>
                         <li>
-                            <a href="#none">작업 지시 등록</a>
+                            <a href="#none">자재 등록</a>
                         </li>
                     </ul>
                 </li>
 
                 <li class="menu01">
-                    <a href="#none">완제품 재고 관리</a>
+                    <a href="#none">발주 관리</a>
                     <ul class="menu02">
                         <li>
-                            <a href="#none">완제품 재고 목록</a>
+                            <a href="#none">발주 목록</a>
                         </li>
                         <li>
-                            <a href="#none">완제품 재고 등록</a>
+                            <a href="#none">발주 신청</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu01">
+                    <a href="#none">입고 관리</a>
+                    <ul class="menu02">
+                        <li>
+                            <a href="#none">입고 목록</a>
                         </li>
                     </ul>
                 </li>
                 
                 <li class="menu01">
-                    <a href="#none">출고 관리</a>
+                    <a href="#none">공급처 관리</a>
                     <ul class="menu02">
                         <li>
-                            <a href="#none">출고 목록</a>
+                            <a href="#none">공급처 목록</a>
                         </li>
                     </ul>
                 </li>
-
-                <li class="menu01">
-                    <a href="#none">자재 재고 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">자재 재고 목록</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="menu01">
-                    <a href="#none">거래처 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">거래처 목록</a>
-                        </li>
-                    </ul>
-                </li>
-                
                 <li class="menu01">
                     <a href="#none">마이페이지</a>
                 </li>
@@ -130,181 +204,244 @@
         <!-- 죄측 메뉴바 끝 -->
 
         <!-- 컨텐츠 영역 시작 -->
-        <div id="contents">
-            <div class="con_title">
-                <h2>자재 등록하기</h2>
+        <div id="contents">            
+            <div class="orderForm">
+                <div class="ord_title">
+                    <p>입고 명세서</p>
+                    <div class="ordR">
+				        <p>입고코드 : <span th:text="${reasonCode}"></span></p>
+				        <p>입고일자 : <span th:text="${todayDate}"></span></p>
+				      </div>
+                </div>
+                <div class="ord_top">
+                    <div class="ord_tcon">
+                        <p>수신처</p>
+                        <table class="table3">
+                            <tr>
+                                <th>담당자명</th>
+                                <td th:text="${receiverName}">김철수</td>
+                            </tr>
+                            <tr>
+                                <th>담당부서</th>
+                                <td th:text="${receiverDept}">구매팀</td>
+                            </tr>
+                            <tr>
+                                <th>연락처</th>
+                                <td th:text="${receiverPhone}">010-1111-2222</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="ord_tcon">
+                        <p>공급처</p>
+                        <table class="table3">
+                            <tr>
+						        <th>공급처명</th>
+						        <td th:text="${supplier != null ? supplier.cname : ''}">제이앤테크</td>
+						    </tr>
+						    <tr>
+						        <th>대표자</th>
+						        <td th:text="${supplier != null ? supplier.cowner : ''}">김지훈</td>
+						    </tr>
+						    <tr>
+						        <th>연락처</th>
+						        <td th:text="${supplier != null ? supplier.cphone : ''}">031-1111-2222</td>
+						    </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="ord_content">
+                     <table class="table1" id="stockTable">
+				        <colgroup>
+				          <col width="5%"/>
+				          <col width="20%"/>
+				          <col width="10%"/>
+				          <col width="12%"/>
+				          <col width="15%"/>
+				          <col width="10%"/>
+				          <col width="10%"/>
+				          <col width="15%"/>
+				          <col width="15%"/>
+				        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>NO.</th>
+                                <th>자재명</th>
+                                <th>가용/불용</th>
+                                <th>출하창고명</th>
+                                <th>단가</th>
+                                <th>발주 수량</th>
+                                <th>입고 수량</th>
+                                <th>공급가액</th>
+                                <th>세액</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockBody">
+						  <tr th:each="item, stat : ${stockList}"
+							  th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
+						    <td th:text="${stat.index + 1}"></td>
+						    <td th:text="${item['iname']}"></td>
+						    <td>
+						      <select name="status">
+						        <option th:selected="${item.status} == '가용'">가용</option>
+						        <option th:selected="${item.status} == '불용'">불용</option>
+						      </select>
+						    </td>
+						    <td>
+							    <select name="ownm">
+								  <option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
+								  <option value="B 창고" th:selected="${item['ownm'] == 'B 창고'}">B 창고</option>
+								</select>
+						    </td>
+						    <td class="price" th:text="${#numbers.formatInteger(item['ouprc'], 3, 'COMMA')} + '원'"></td>
+						    <td class="ordqty" th:text="${item['oqty']} + '개'"></td>
+						    <td class="stiqty">
+						    	<input type="number" class="stiQtyInput" min="0" style="width: 60px;" />
+  								<span class="unit">개</span>
+  							</td>
+						    <td class="supply" th:text="${#numbers.formatInteger(item['supply'], 3, 'COMMA')}"></td>
+						    <td class="tax" th:text="${#numbers.formatInteger(item['tax'], 3, 'COMMA')}"></td>
+						  </tr>
+                            
+                            <tr class="table_total">
+							    <td colspan="5">합계</td>
+							    <td id="totalOrdQty" class="totalOrdQty"></td>
+							    <td id="totalStiQty" class="totalStiQty"></td>
+							    <td id="totalSupply" class="totalSupply"></td>
+							    <td id="totalTax" class="totalTax"></td>
+							</tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="ord_ucon">
+                    <table class="table3">
+                        <tr>
+                            <th>특이사항</th>
+                            <td>
+                                <textarea placeholder="특이사항을 입력해주세요."></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-            <div class="table_wrap">
-                <table class="table2">
-                    <tr>
-                        <th>
-                            <label>
-                                입고 코드
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${reasoncode}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                상태
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.podid}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                자재 코드
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${product.prdid}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                자재명
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${product.prdnm}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                수량
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.podqty}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                단가
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.prduprcout}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                총금액
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${productionOrder.stowh}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                창고명
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="본사 1창고" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                거래처명
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.cltnm}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                발주 코드
-                                <span>*</span>
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.podstat}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                발주 납기일
-                                <span>*</span>
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.podstat}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                등록일
-                                <span>*</span>
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.podstat}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                입고 처리일
-                                <span>*</span>
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.podstat}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                담당자
-                            </label>
-                        </th>
-                        <td>
-                           <input type="text" value="${stockOut.podpicid}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>
-                                특이사항
-                                <span>*</span>
-                            </label>
-                        </th>
-                        <td>
-                            <input type="text" value="${stockOut.podstat}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    
-                </table>
-                
-                <div class="under_btn_wrap flex_center">
-	                <button type="button" class="blue_btn">입고</button>
-	                <button type="button" class="blue_border_btn">목록</button>
+            <div class="under_btn_wrap flex_center">
+                <button type="button" class="blue_btn" id="insertBtn">입고</button>		<!-- 불용 없으면 목록, 불용 있으면 불용 사유 입력 화면 -->
+                <button type="button" class="blue_border_btn" onClick="location='/stockIn/stockInList'">목록</button>
             </div>
         </div>
         <!-- 컨텐츠 영역 끝 -->
+
+        
     </section>
     <!-- section 컨텐츠 영역 끝 -->
 
+	<script>
+	function calcTotals() {
+		  let totalOrdQty = 0;
+		  let totalStiQty = 0;
+		  let totalSupply = 0;
+		  let totalTax = 0;
 
+		  $('#stockBody tr').each(function () {
+		    const price = parseFloat($(this).find('.price').text().replace(/,/g, '')) || 0;
+		    const ordqty = parseFloat($(this).find('.ordqty').text().replace(/,/g, '')) || 0;
+		    const stiqty = parseFloat($(this).find('.stiQtyInput').val()) || 0;
+		    const supply = price * stiqty;
+		    const tax = supply * 0.1;
+
+		    $(this).find('.supply').text(supply.toLocaleString());
+		    $(this).find('.tax').text(tax.toLocaleString());
+
+		    totalOrdQty += ordqty;
+		    totalStiQty += stiqty;
+		    totalSupply += supply;
+		    totalTax += tax;
+		  });
+
+		  $('#totalOrdQty').text(totalOrdQty + '개');
+		  $('#totalStiQty').text(totalStiQty + '개');
+		  $('#totalSupply').text(totalSupply.toLocaleString());
+		  $('#totalTax').text(totalTax.toLocaleString());
+		}
+	
+	    $(document).on('input', '.price, .ordqty, .stiqty', calcTotals);
+	    $(document).ready(calcTotals);
+	    
+	    
+    </script>
     
-  
+    
+    <!-- modal 시작 -->
+    <div id="requestOrder_modal" class="modal_container hidden">
+        <div id="modal_con" class="modal_con2 center">
+            <div class="modal_header">
+                <h2>불용 사유 입력</h2>
+                <button type="button" id="closeModalBtn">
+                    <img src="/images/modalClose_btn.svg" alt="모달 닫기 버튼">
+                </button>
+            </div>
+            <div class="modal_body">
+                <div class="table_wrap">
+                    <table class="table2" style="width: 100%;">
+                    <tr>
+                        <th>
+                            <label>입고 코드</label>
+                        </th>
+                        <td>
+                            <input type="text" th:value="${reasonCode}" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>자재명</label>
+                        </th>
+                        <td>
+                            <input type="text" th:value="${itemName}" class="readonly" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>수량</label>
+                        </th>
+                        <td>
+                            <input type="text" placeholder="입고 수량을 입력하세요.">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>불용 사유 선택</label>
+                        </th>
+                        <th class="select_box">
+                            <select>
+                                <option value="0" selected>입고 사유를 선택하세요.</option>
+                                <option value="1">포장 손상 / 파손 발견</option>
+                                <option value="2">수량 부족 / 과다</option>
+                                <option value="3">유효기간 경과</option>
+                                <option value="4">품질 검사 불합격</option>
+                                <option value="5">납기일 초과 입고</option>
+                                <option value="6">잘못된 품목 입고</option>
+                                <option value="7">기타(직접 입력)</option>
+                            </select>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label>불용 사유 상세 입력</label>
+                        </th>
+                        <td>
+                            <textarea placeholder="사유를 입력하세요."></textarea>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+            </div>
+            <div class="under_btn_wrap flex_center">
+                <button type="button" class="blue_btn" id="reasonSubmitBtn">신청</button>
+                <button type="button" id="cancelModalBtn" class="blue_border_btn">취소</button>
+            </div>
+        </div>
+    </div>
+    <!-- modal 끝 -->
+
 </body>
 </html>

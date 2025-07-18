@@ -139,6 +139,154 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 				/**
 				 * 수림 끝
 				 */
+				
+				
+	/**
+	 *  수경
+	 */
 
+				// 수신처 데이터
+				@Query(value = """
+					    SELECT e.ename, d.dname, e.ephone
+					    FROM emp e
+					    JOIN dept d ON e.dptcd = d.dcode
+					    WHERE e.ecode = :empCode
+					    """, nativeQuery = true)
+					List<Object[]> findEmployeeWithDept(@Param("empCode") int empCode);
+				
+				// 입고 코드(ocode) 기준으로 한 줄만 보여주는 요약 데이터
+					@Query(
+						    value = """
+						        SELECT DISTINCT
+						            o.ono,
+						            MIN(o.ostate) AS ostate,
+						            MIN(o.oqty) AS oqty,
+						            CASE 
+						                WHEN o.matcd IS NOT NULL THEN CONCAT('MAT', o.matcd)
+						                WHEN o.prdcd IS NOT NULL THEN CONCAT('PRD', o.prdcd)
+						                WHEN o.faccd IS NOT NULL THEN CONCAT('FAC', o.faccd)
+						                ELSE 'Unknown'
+						            END AS matCode,
+						            MIN(i.iname) AS iname,
+						            MIN(c.cname) AS cname,
+						            MIN(o.omgr) AS omgr,
+						            MIN(o.odate) AS odate
+						        FROM
+						            orders o
+						        LEFT JOIN
+						            client c ON o.supcd = c.ccode
+						        LEFT JOIN
+						            inventory i ON (
+						                (o.matcd = i.icode AND i.igubun = 'MAT') OR
+						                (o.prdcd = i.icode AND i.igubun = 'PRD') OR
+						                (o.faccd = i.icode AND i.igubun = 'FAC')
+						            )
+						        WHERE
+						            o.ogubun = 'STI'
+						            AND (?1 IS NULL OR o.ostate LIKE '%' || ?1 || '%')
+						            AND (?2 IS NULL OR LOWER(c.cname) LIKE LOWER('%' || ?2 || '%'))
+						            AND (?3 IS NULL OR o.omgr LIKE '%' || ?3 || '%')
+						            AND (?4 IS NULL OR TO_CHAR(o.odate, 'YYYY-MM-DD') = ?4)
+						        GROUP BY
+						            o.ono, o.matcd, o.prdcd, o.faccd, o.supcd
+						        ORDER BY
+						            o.ono DESC
+						    """,
+						    countQuery = """
+						        SELECT COUNT(*)
+						        FROM (
+						            SELECT DISTINCT o.ono
+						            FROM orders o
+						            LEFT JOIN client c ON o.supcd = c.ccode
+						            WHERE
+						                o.ogubun = 'STI'
+						                AND (?1 IS NULL OR o.ostate LIKE '%' || ?1 || '%')
+						                AND (?2 IS NULL OR LOWER(c.cname) LIKE LOWER('%' || ?2 || '%'))
+						                AND (?3 IS NULL OR o.omgr LIKE '%' || ?3 || '%')
+						                AND (?4 IS NULL OR TO_CHAR(o.odate, 'YYYY-MM-DD') = ?4)
+						            GROUP BY o.ono
+						        ) sub
+						    """,
+						    nativeQuery = true
+						)
+						Page<Object[]> findFilteredOrders(
+						    @Param("status") String status,
+						    @Param("client") String client,
+						    @Param("manager") String manager,
+						    @Param("date") String date,
+						    Pageable pageable
+						);
+				
+				
+				// 입고 명세서의 입고 코드 	// DB에서 마지막 코드
+				@Query(value = "SELECT ocode FROM stock_in ORDER BY ocode DESC LIMIT 1", 
+						nativeQuery = true)
+				String findLastCode();
+				
+				// 가장 큰 reasonCode 가져오기 (예: STI0012)
+				@Query(value = "SELECT ocode FROM (SELECT ocode FROM orders ORDER BY ocode DESC) WHERE ROWNUM = 1", 
+						nativeQuery = true)
+				String findLastReasonCode();
+				
+				
+				// 입고 명세서 데이터
+				@Query(value = """
+					    SELECT i.iname, o.ownm, o.ouprc, o.oqty
+					    FROM ORDERS o
+					    JOIN INVENTORY i
+					      ON (
+					        (o.matcd = i.icode AND i.igubun = 'MAT')
+					        OR (o.prdcd = i.icode AND i.igubun = 'PRD')
+					        OR (o.faccd = i.icode AND i.igubun = 'FAC')
+					      )
+					    WHERE o.ogubun = 'STI'
+					""", nativeQuery = true)
+					List<Object[]> findStockInData();
+				
+
+				// 상태 '입고' 포함된 항목 조회
+				@Query("SELECT o FROM OrdersDto o WHERE o.ostate = '입고'")
+				List<OrdersDto> findOnlyIpgo();
+
+				// 입고 명세서 상세
+				@Query("SELECT o FROM OrdersDto o WHERE o.ocode = :ocode AND o.ogubun = 'STI'")
+				OrdersDto findByOcode(@Param("ocode") Integer ocode);
+
+				List<Object[]> findOrderDetailsByOcode(int ocode);
+				
+				@Query(value = """
+			            SELECT 
+			                o.ono,
+			                o.ostate AS stateText,
+			                o.oqty AS qtyWithUnit,
+			                CASE 
+			                    WHEN o.matcd IS NOT NULL THEN CONCAT('MAT', o.matcd)
+			                    WHEN o.prdcd IS NOT NULL THEN CONCAT('PRD', o.prdcd)
+			                    WHEN o.faccd IS NOT NULL THEN CONCAT('FAC', o.faccd)
+			                    ELSE 'Unknown'
+			                END AS matCode,
+			                i.iname AS matName,  
+			                c.cname AS clientName,  
+			                o.omgr AS manager,  
+			                o.odate  
+			            FROM 
+			                orders o
+			            LEFT JOIN 
+			                client c ON o.supcd = c.ccode
+			            LEFT JOIN 
+			                inventory i ON (
+			                    (o.matcd = i.icode AND i.igubun = 'MAT') OR
+			                    (o.prdcd = i.icode AND i.igubun = 'PRD') OR
+			                    (o.faccd = i.icode AND i.igubun = 'FAC')
+			                )
+			            WHERE 
+			                o.ogubun = 'STI' 
+			                AND o.ono = :ono
+			            """, nativeQuery = true)
+			    List<Object[]> findStockInDetailsByOno(@Param("ono") Integer ono);
+			    
+	/** 
+	 * 수경 끝
+	 */
 
 }
