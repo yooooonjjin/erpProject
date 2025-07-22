@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.teamProject2.entity.ReasonDto;
 import com.teamProject2.repository.ClientRepository;
@@ -39,6 +40,7 @@ import com.teamProject2.service.OrdersService;
 import com.teamProject2.service.ReasonService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/stockIn")
@@ -81,8 +83,9 @@ public class StockInController {
             @RequestParam(required = false) String manager,
             @RequestParam(required = false) String date,
             HttpServletRequest request,
+            HttpSession session,
             Model model) {
-
+    	
         // 기존 null/빈 문자열 처리 코드
         status = (status == null || status.isEmpty()) ? null : status;
         if (status == null) {
@@ -142,6 +145,9 @@ public class StockInController {
         model.addAttribute("client", client);
         model.addAttribute("manager", manager);
         model.addAttribute("date", date);
+
+        // 로그인 정보
+        model.addAttribute("loginEname", session.getAttribute("LOGIN_ENAME"));
 
         return "stockIn/stockInList";
     }
