@@ -19,6 +19,7 @@ public class ReasonService {
 		this.reasonRepository = reasonRepository;
 	}
 
+	
 	// 불용 사유 저장 메서드
 	public void save(ReasonDto reasonDto) {
 	    try {

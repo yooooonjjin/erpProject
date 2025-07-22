@@ -142,9 +142,9 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 				 */
 				
 				
-	/**
-	 *  수경
-	 */
+		/**
+		 *  수경
+		 */
 
 				// 수신처 데이터
 				@Query(value = """
@@ -303,8 +303,8 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 
 
 			    
-	/** 
-	 * 수경 끝
-	 */
+		/** 
+		 * 수경 끝
+		 */
 
 }

@@ -39,7 +39,6 @@ public interface ClientRepository extends JpaRepository<ClientDto, ClientId> {
 
 		ClientDto findByCgubunAndCcode(String string, Integer supcd);
 
-
 		/** 
 		 * 끝
 		 */

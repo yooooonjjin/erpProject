@@ -162,11 +162,9 @@ public class StockInController {
         
         // 입고 코드 자동 생성
         String reasonCode = ordersService.generateNextReasonCode(ono);
-        System.out.println("Generated reason code: " + reasonCode);  // 생성된 입고 코드 로그 확인
         model.addAttribute("reasonCode", reasonCode);
         
        
-        System.out.println("reasonCode in model: " + model.getAttribute("reasonCode"));
 
         // OrdersDto를 통해 matcd 가져오기
         ono = Integer.parseInt("10" + ono); 
@@ -185,7 +183,6 @@ public class StockInController {
 
             // inventory가 존재하면 자재명을 가져오고, 없으면 "Unknown"으로 설정
             String itemName = inventory.map(InventoryDto::getIname).orElse("Unknown");
-            System.out.println("itemName: " + itemName);  // itemName 값 로그 출력
 
             // 자재명 모델에 추가
             model.addAttribute("itemName", itemName);  // 자재명 전달
@@ -209,8 +206,6 @@ public class StockInController {
                 model.addAttribute("receiverDept", empInfo[1]);
                 model.addAttribute("receiverPhone", empInfo[2]);
 
-                // 🔍 수신처 로그 출력
-                System.out.println("수신처 이름: " + receiverName);
                 }
             }
         
@@ -218,16 +213,12 @@ public class StockInController {
         
         if (!orders.isEmpty()) {
         	
-        	System.out.println("📦 detailList size: " + detailList.size());
             OrdersDto order = orders.get(0);  // ✅ 이미 꺼낸 주문 객체
 
             Integer supplierCode = order.getSupcd();  // 🔄 여기 수정됨
 
             // ✅ 공급처 정보 1개 조회
             ClientDto supplier = clientRepository.findSupplierByCode(supplierCode);
-
-            System.out.println("공급처 코드: " + supplierCode);
-            System.out.println("공급처 이름: " + (supplier != null ? supplier.getCname() : "없음"));
 
             model.addAttribute("supplier", supplier);
         }
