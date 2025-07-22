@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.teamProject2.entity.ReasonDto;
 import com.teamProject2.service.ReasonService;
+import com.teamProject2.entity.OrdersId;
 import com.teamProject2.entity.ClientDto;
 import com.teamProject2.entity.OrdersDto;
 import com.teamProject2.repository.ClientRepository;
@@ -20,6 +21,7 @@ import com.teamProject2.repository.OrdersRepository;
 import com.teamProject2.repository.ReasonRepository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -533,17 +535,19 @@ public class OrdersService {
     	}
     	
     	// 입고 명세서 데이터
-    	public List<Map<String, Object>> getStockInData() {
+    	public List<Map<String, Object>> getStockInData(Integer ono) {
     		 // 입고 데이터를 조회하는 쿼리
-    	    List<Object[]> rows = ordersRepository.findStockInData();
+    	    List<Object[]> rows = ordersRepository.findStockInData(ono);
     	    List<Map<String, Object>> result = new ArrayList<>();
 
     	    for (Object[] row : rows) {
     	        Map<String, Object> map = new HashMap<>();
-    	        String iname = (String) row[0];
+    	        System.out.println("========="+row[5]);
+    	        // row[0] = ono / row[1] = ostate / row[2] = oqty / row[3] = 입고코드 / row[4] = 자재명/ row[5]= cname/ row[6]= omgr / row[7] = odate
+    	        String iname = (String) row[4];
     	        String ownm = (String) row[1];
-    	        Integer ouprc = ((Number) row[2]).intValue();
-    	        Integer oqty = ((Number) row[3]).intValue();
+    	        Integer ouprc = ((Number) row[5]).intValue();
+    	        Integer oqty = ((Number) row[2]).intValue();
     	        Integer supply = ouprc * oqty;
     	        Integer tax = (int) (supply * 0.1);
 
@@ -570,37 +574,61 @@ public class OrdersService {
     	        return ordersRepository.findAll();
     	    }
     	    
-    	    public OrdersDto getOrdersByOcode(int ocode) {
-    	        return ordersRepository.findByOcode(ocode); // ocode로 주문 데이터 조회
+    	    public List<OrdersDto> getOrdersByOcode(int ono) {
+    	        return ordersRepository.findByOno(ono); // ocode로 주문 데이터 조회
     	    }
 
     	    // 불용 사유 저장 후 상태 변경
-    	    public void insertReasonAndUpdateState(ReasonDto reasonDto, Integer ocode) {
+    	    public void insertReasonAndUpdateState(ReasonDto reasonDto, Integer ono) {
     	        // 1. 불용 사유 저장
     	        reasonService.save(reasonDto);
     	        // 2. 주문 상태 업데이트
-    	        updateOrderState(ocode);
+    	        updateOrderState(ono);
     	    }
 
     	    // 주문 상태 변경
     	    @Transactional
-    	    public void updateOrderState(Integer ocode) {
-    	        
-    	        OrdersDto order = ordersRepository.findByOcode(ocode);
-    	        
-    	        // findByOcode가 반환하는 값 확인
-    	        if (order == null) {
-    	            throw new RuntimeException("주문을 찾을 수 없습니다. ocode: " + ocode);
+    	    public void updateOrderState(Integer ono) {
+    	        System.out.println("Finding order with ono: " + ono);
+    	        List<OrdersDto> orderList = ordersRepository.findByOno(ono);
+    	        if (orderList == null || orderList.isEmpty()) {
+    	            System.out.println("주문을 찾을 수 없습니다. ono: " + ono);
+    	            throw new RuntimeException("주문을 찾을 수 없습니다. ono: " + ono);
     	        }
 
-    	        // 상태를 "입고 완료"로 업데이트
-    	        order.setOstate("입고 완료");
-    	        order.setOidate(new Timestamp(System.currentTimeMillis()));  // 입고 일자 갱신 (현재 시간)
+    	        System.out.println("🔍 주문을 찾았음: " + ono);
 
-    	        // 변경된 상태 저장
-    	        ordersRepository.save(order);
-    	        ordersRepository.updateOrderState(ocode);
+    	        for (OrdersDto order : orderList) {
+    	            order.setOstate("입고 완료");
+    	            order.setOidate(new Timestamp(System.currentTimeMillis()));
+    	            ordersRepository.save(order);
+    	        }
+
+    	        System.out.println("==============ono = " + ono);
     	    }
+
+    	    public void save(OrdersDto dto) {
+    	        // 복합키 생성
+    	        OrdersId ordersId = new OrdersId(dto.getOno(), dto.getOgubun(), dto.getOcode());
+
+    	        // 기존 주문 찾기
+    	        Optional<OrdersDto> optional = ordersRepository.findById(ordersId);
+    	        if (optional.isPresent()) {
+    	            OrdersDto order = optional.get();
+
+    	            // 입고 수량 누적 저장
+    	            order.setStiqty(dto.getStiqty());
+
+    	            // 공급가액 및 세액 저장
+    	            order.setOsuprc(dto.getOsuprc());
+    	            order.setOtax(dto.getOtax());
+
+    	            // 입고 완료로 상태 변경
+    	            order.setOstate("입고 완료");
+
+    	            ordersRepository.save(order); // 저장
+    	        }
+    		}
     	   
 
 

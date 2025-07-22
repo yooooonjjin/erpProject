@@ -26,4 +26,10 @@ public class InventoryService {
         // 자재명이 있으면 반환, 없으면 "Unknown"
         return inventoryOptional.map(InventoryDto::getIname).orElse("Unknown");
     }
+    
+    public String getItemNameByCode(Integer code) {
+        return inventoryRepository.findByMatcd(code)
+            .map(InventoryDto::getIname)
+            .orElse("Unknown");
+    }
 }

@@ -163,9 +163,9 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 						            MIN(o.ostate) AS ostate,
 						            MIN(o.oqty) AS oqty,
 						            CASE 
-						                WHEN o.matcd IS NOT NULL THEN CONCAT('MAT', o.matcd)
-						                WHEN o.prdcd IS NOT NULL THEN CONCAT('PRD', o.prdcd)
-						                WHEN o.faccd IS NOT NULL THEN CONCAT('FAC', o.faccd)
+						                WHEN MIN(o.matcd) IS NOT NULL THEN CONCAT('MAT', MIN(o.matcd))
+						                WHEN MIN(o.prdcd) IS NOT NULL THEN CONCAT('PRD', MIN(o.prdcd))
+						                WHEN MIN(o.faccd) IS NOT NULL THEN CONCAT('FAC', MIN(o.faccd))
 						                ELSE 'Unknown'
 						            END AS matCode,
 						            MIN(i.iname) AS iname,
@@ -189,10 +189,10 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 						            AND (?3 IS NULL OR o.omgr LIKE '%' || ?3 || '%')
 						            AND (?4 IS NULL OR TO_CHAR(o.odate, 'YYYY-MM-DD') = ?4)
 						        GROUP BY
-						            o.ono, o.matcd, o.prdcd, o.faccd, o.supcd
+						            o.ono, o.supcd
 						        ORDER BY
 						            o.ono DESC
-						    """,
+						        """,
 						    countQuery = """
 						        SELECT COUNT(*)
 						        FROM (
@@ -205,9 +205,9 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 						                AND (?2 IS NULL OR LOWER(c.cname) LIKE LOWER('%' || ?2 || '%'))
 						                AND (?3 IS NULL OR o.omgr LIKE '%' || ?3 || '%')
 						                AND (?4 IS NULL OR TO_CHAR(o.odate, 'YYYY-MM-DD') = ?4)
-						            GROUP BY o.ono
+						            GROUP BY o.ono, o.supcd
 						        ) sub
-						    """,
+						        """,
 						    nativeQuery = true
 						)
 						Page<Object[]> findFilteredOrders(
@@ -219,30 +219,41 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 						);
 				
 				
-				// 입고 명세서의 입고 코드 	// DB에서 마지막 코드
-				@Query(value = "SELECT ocode FROM stock_in ORDER BY ocode DESC LIMIT 1", 
-						nativeQuery = true)
-				String findLastCode();
-				
-				// 가장 큰 reasonCode 가져오기 (예: STI0012)
-				@Query(value = "SELECT ocode FROM (SELECT ocode FROM orders ORDER BY ocode DESC) WHERE ROWNUM = 1", 
-						nativeQuery = true)
-				String findLastReasonCode();
-				
-				
 				// 입고 명세서 데이터
-				@Query(value = """
-					    SELECT i.iname, o.ownm, o.ouprc, o.oqty
-					    FROM ORDERS o
-					    JOIN INVENTORY i
-					      ON (
-					        (o.matcd = i.icode AND i.igubun = 'MAT')
-					        OR (o.prdcd = i.icode AND i.igubun = 'PRD')
-					        OR (o.faccd = i.icode AND i.igubun = 'FAC')
-					      )
-					    WHERE o.ogubun = 'STI'
-					""", nativeQuery = true)
-					List<Object[]> findStockInData();
+						@Query(value = """
+							    SELECT 
+							        o.ono,
+							        o.ostate AS stateText,
+							        o.oqty AS qtyWithUnit,
+							        CASE 
+							            WHEN o.matcd IS NOT NULL THEN CONCAT('MAT', o.matcd)
+							            WHEN o.prdcd IS NOT NULL THEN CONCAT('PRD', o.prdcd)
+							            WHEN o.faccd IS NOT NULL THEN CONCAT('FAC', o.faccd)
+							            ELSE 'Unknown'
+							        END AS matCode,
+							        i.iname AS matName,
+							        o.ouprc AS price,
+							        (SELECT cname FROM client WHERE ccode = o.supcd AND ROWNUM = 1) AS clientName,
+							        o.omgr AS manager,  
+							        o.odate
+							    FROM 
+							        orders o
+							    LEFT JOIN 
+							        inventory i ON (
+							            (o.matcd = i.icode AND i.igubun = 'MAT') OR
+							            (o.prdcd = i.icode AND i.igubun = 'PRD') OR
+							            (o.faccd = i.icode AND i.igubun = 'FAC')
+							        )
+							    WHERE 
+							        o.ogubun = 'STI' 
+							        AND o.ono = :ono
+							        AND (
+							            (o.matcd IS NOT NULL AND EXISTS (SELECT 1 FROM inventory WHERE icode = o.matcd AND igubun = 'MAT')) OR
+							            (o.prdcd IS NOT NULL AND EXISTS (SELECT 1 FROM inventory WHERE icode = o.prdcd AND igubun = 'PRD')) OR
+							            (o.faccd IS NOT NULL AND EXISTS (SELECT 1 FROM inventory WHERE icode = o.faccd AND igubun = 'FAC'))
+							        )
+							""", nativeQuery = true)
+					List<Object[]> findStockInData(@Param("ono") Integer ono);
 				
 
 				// 상태 '입고' 포함된 항목 조회
@@ -251,10 +262,10 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 
 				// 입고 명세서 상세
 				@Query("SELECT o FROM OrdersDto o WHERE o.ono = :ono AND o.ogubun = 'STI'")
-				OrdersDto findByOcode(@Param("ono") Integer ono);
+				List<OrdersDto> findByOno(@Param("ono") Integer ono);
 
 				@Query("SELECT o FROM OrdersDto o WHERE o.ono = :ono")
-				List<Object[]> findOrderDetailsByOcode(@Param("ono") Integer ono);
+				List<OrdersDto> findOrderDetailsByOcode(@Param("ono") Integer ono);
 				
 				@Query(value = """
 			            SELECT 
@@ -291,16 +302,21 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 			    // 입고 완료 상태로 업데이트
 			    @Modifying
 			    @Transactional
-			    @Query("UPDATE OrdersDto o SET o.ostate = '입고 완료' WHERE o.ocode = :ocode AND o.ogubun = 'STI'")
-			    int updateOrderState(@Param("ocode") Integer ocode);
+			    @Query("UPDATE OrdersDto o SET o.ostate = '입고 완료' WHERE o.ono = :ono AND o.ogubun = 'STI'")
+			    int updateOrderState(@Param("ono") Integer ono);
+			    
+				@Modifying
+				//	@Query("UPDATE OrdersDto o SET o.ostate = '입고 완료', o.oidate = CURRENT_TIMESTAMP WHERE o.ocode = :ocode")
+				//	void updateOrderState(@Param("ocode") Integer ocode);
 
 			 
-			    @Query("SELECT o.oqty FROM OrdersDto o WHERE o.ocode = :ordcd")
+			    @Query("SELECT o.oqty FROM OrdersDto o WHERE o.ono = :ordcd")
 			    Integer findQtyByOrdcd(@Param("ordcd") Integer ordcd);
 
-			    
-				List<OrdersDto> findAllByOnoAndOgubun(int ono, String string);
+				//List<OrdersDto> findByOnoAndOgubun(Integer ono, String string);
 
+
+				
 
 			    
 		/** 

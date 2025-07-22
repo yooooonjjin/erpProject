@@ -83,9 +83,12 @@ public class StockInController {
             @RequestParam(required = false) String manager,
             @RequestParam(required = false) String date,
             HttpServletRequest request,
-            HttpSession session,
             Model model) {
-    	
+
+        // 페이징을 위해 현재 페이지를 설정하고, 기본값 1을 설정
+        int pageSize = 10;  // 페이지 크기 설정
+        Pageable pageable = PageRequest.of(indexPage - 1, pageSize);
+
         // 기존 null/빈 문자열 처리 코드
         status = (status == null || status.isEmpty()) ? null : status;
         if (status == null) {
@@ -94,19 +97,16 @@ public class StockInController {
         client = (client == null || client.isEmpty()) ? null : client;
         manager = (manager == null || manager.isEmpty()) ? null : manager;
         date = (date == null || date.isEmpty()) ? null : date;
-
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(indexPage - 1, pageSize);
-
+        
         // 서비스 호출(레포지토리에서 페이징 처리된 데이터를 받아옴)
         Page<Object[]> pagedOrders = ordersService.getFilteredOrders(status, client, manager, date, pageable);
 
+        // 페이지 네비게이션을 위한 데이터 계산
         List<Map<String, Object>> mappedList = new ArrayList<>();
         for (Object[] row : pagedOrders.getContent()) {
 
             Map<String, Object> map = new HashMap<>();
 
-            // row[0]이 `BigDecimal`로 `ono` 값을 나타낸다고 가정
             if (row[0] instanceof Integer) {
                 Integer ono = (Integer) row[0];  // Integer 타입으로 처리
 
@@ -146,9 +146,6 @@ public class StockInController {
         model.addAttribute("manager", manager);
         model.addAttribute("date", date);
 
-        // 로그인 정보
-        model.addAttribute("loginEname", session.getAttribute("LOGIN_ENAME"));
-
         return "stockIn/stockInList";
     }
     
@@ -162,40 +159,80 @@ public class StockInController {
         
         // 입고 코드 자동 생성
         String reasonCode = ordersService.generateNextReasonCode(ono);
+        System.out.println("Generated reason code: " + reasonCode);  // 생성된 입고 코드 로그 확인
         model.addAttribute("reasonCode", reasonCode);
         
        
+        System.out.println("reasonCode in model: " + model.getAttribute("reasonCode"));
 
         // OrdersDto를 통해 matcd 가져오기
         ono = Integer.parseInt("10" + ono); 
         
-        // ogubun='STI'이고 ocode=xxx인 주문 1건을 조회
-        List<OrdersDto> orders = ordersRepository.findAllByOnoAndOgubun(ono, "STI");
-        if (!orders.isEmpty()) {
-            OrdersDto order = orders.get(0);  // ✅ 리스트에서 하나 꺼냄
-            System.out.println("=========="+order);
+        List<OrdersDto> orders = ordersRepository.findByOnoAndOgubun(ono, "STI");
 
-            int matcd = order.getMatcd();  // ✅ 리스트 전체가 아니라 하나 꺼낸 객체에서 호출
-            System.out.println("=========matcd 이름: " + matcd);
+        // ogubun='STI'이고 ono=xxx인 주문 1건을 조회
+        List<Map<String, Object>> matList = new ArrayList<>();
 
-            // matcd를 통해 Inventory에서 자재명(iname) 조회
-            Optional<InventoryDto> inventory = inventoryRepository.findByMatcd(matcd);
+        for (OrdersDto order : orders) {
+            Integer code = null;
+            String prefix = "";
 
-            // inventory가 존재하면 자재명을 가져오고, 없으면 "Unknown"으로 설정
+            if (order.getMatcd() != null) {
+                code = order.getMatcd();
+                prefix = "MAT";
+            } else if (order.getPrdcd() != null) {
+                code = order.getPrdcd();
+                prefix = "PRD";
+            } else if (order.getFaccd() != null) {
+                code = order.getFaccd();
+                prefix = "FAC";
+            } else {
+                throw new IllegalStateException("matcd, prdcd, faccd 모두 null입니다.");
+            }
+
+            String matCode = prefix + code;
+
+            Optional<InventoryDto> inventory = inventoryRepository.findByMatcd(code);
             String itemName = inventory.map(InventoryDto::getIname).orElse("Unknown");
 
-            // 자재명 모델에 추가
-            model.addAttribute("itemName", itemName);  // 자재명 전달
+            Map<String, Object> map = new HashMap<>();
+            map.put("matCode", matCode);
+            map.put("itemName", itemName);
+            map.put("order", order);  // 필요하다면 주문 정보도 같이 담기
+
+            matList.add(map);
         }
 
+        model.addAttribute("matList", matList);
+
         // 입고 상세 항목 데이터 조회
-        List<Object[]> detailList = ordersRepository.findOrderDetailsByOcode(ono);
+        List<OrdersDto> orderList = ordersRepository.findByOno(ono);
+        List<Map<String, Object>> detailList = new ArrayList<>();
+
+        for (OrdersDto dto : orderList) {
+            Map<String, Object> row = new HashMap<>();
+            row.put("order", dto);
+
+            // 자재명 가져오기
+            if (dto.getMatcd() != null) {
+                InventoryDto inv = inventoryRepository.findByIcodeAndIgubun(dto.getMatcd(), "MAT");
+                row.put("matName", inv.getIname());
+            } else if (dto.getPrdcd() != null) {
+                InventoryDto inv = inventoryRepository.findByIcodeAndIgubun(dto.getPrdcd(), "PRD");
+                row.put("matName", inv.getIname());
+            } else if (dto.getFaccd() != null) {
+                InventoryDto inv = inventoryRepository.findByIcodeAndIgubun(dto.getFaccd(), "FAC");
+                row.put("matName", inv.getIname());
+            }
+
+            detailList.add(row);
+        }
+
         model.addAttribute("detailList", detailList);
 
-        // 담당자 코드로 사원 정보 조회
         if (!detailList.isEmpty()) {
-            Object[] first = detailList.get(0);
-            OrdersDto order2 = (OrdersDto) first[0];
+            Map<String, Object> firstRow = detailList.get(0); // ✅ 올바른 방식
+            OrdersDto order2 = (OrdersDto) firstRow.get("order"); // ✅ 여기서 캐스팅
             Integer empCd = order2.getEmpcd();
             
             List<Object[]> results = ordersRepository.findEmployeeWithDept(empCd);
@@ -206,6 +243,8 @@ public class StockInController {
                 model.addAttribute("receiverDept", empInfo[1]);
                 model.addAttribute("receiverPhone", empInfo[2]);
 
+                // 🔍 수신처 로그 출력
+                System.out.println("수신처 이름: " + receiverName);
                 }
             }
         
@@ -213,6 +252,7 @@ public class StockInController {
         
         if (!orders.isEmpty()) {
         	
+        	System.out.println("📦 detailList size: " + detailList.size());
             OrdersDto order = orders.get(0);  // ✅ 이미 꺼낸 주문 객체
 
             Integer supplierCode = order.getSupcd();  // 🔄 여기 수정됨
@@ -220,20 +260,40 @@ public class StockInController {
             // ✅ 공급처 정보 1개 조회
             ClientDto supplier = clientRepository.findSupplierByCode(supplierCode);
 
+            System.out.println("공급처 코드: " + supplierCode);
+            System.out.println("공급처 이름: " + (supplier != null ? supplier.getCname() : "없음"));
+
             model.addAttribute("supplier", supplier);
         }
 
-	    // ✅ 입고 상세 리스트
-	    List<Map<String, Object>> stockList = ordersService.getStockInData();
-	    model.addAttribute("stockList", stockList);
-	      
+     // ✅ 입고 상세 리스트
+        List<Map<String, Object>> stockList = ordersService.getStockInData(ono);
+        
+        // stockList가 5개일 경우, 5개 항목을 채우고 나머지는 빈 객체로 추가
+        while (stockList.size() < 10) {
+            Map<String, Object> emptyItem = new HashMap<>();
+            emptyItem.put("iname", "");
+            emptyItem.put("status", "");
+            emptyItem.put("ownm", "");
+            emptyItem.put("ouprc", 0);
+            emptyItem.put("oqty", 0);
+            emptyItem.put("supply", 0);
+            emptyItem.put("tax", 0);
+            stockList.add(emptyItem);
+        }
+
+        model.addAttribute("stockList", stockList);
+        
         // ✅ 정확한 1건 입고 행 조회
-        OrdersDto order1 = ordersRepository.findByOcode(ono);		// ocode(입고서 행번호)에 해당하는 OrdersDto 객체 한 건을 DB에서 찾아오는 코드 		// 또는 findById()로 대체 가능
+        List<OrdersDto> order1 = ordersRepository.findByOno(ono);		// ocode(입고서 행번호)에 해당하는 OrdersDto 객체 한 건을 DB에서 찾아오는 코드 		// 또는 findById()로 대체 가능
         if (order1 != null) {
             model.addAttribute("order1", order1);
             
             // ✅ 공급처 정보 가져오기
-            ClientDto supplier = clientRepository.findByCgubunAndCcode("sup", order1.getSupcd());
+         // 리스트에서 첫 번째 OrdersDto 객체 꺼내기
+            OrdersDto firstOrder = order1.get(0);
+
+            ClientDto supplier = clientRepository.findByCgubunAndCcode("sup", firstOrder.getSupcd());
             model.addAttribute("supplier", supplier);
             
         }
@@ -256,12 +316,15 @@ public class StockInController {
     @ResponseBody
     public ResponseEntity<Void> insertReason(@RequestBody ReasonDto reasonDto) {
         Integer reasonCode = reasonDto.getSticd();  // ReasonDto에서 ocode (sticd) 값 받기
+        System.out.println("insertReason 호출됨. reasonDto.sticd=" + reasonDto.getSticd());
         try {
 	        // 1. 불용 사유 저장 후 상태 변경
 	        ordersService.insertReasonAndUpdateState(reasonDto, reasonCode);
 	        
 	        // 2. 주문 상태를 "입고 완료"로 업데이트
-	        ordersService.updateOrderState(reasonCode);	// 
+	        System.out.println("서비스 updateOrderState 호출 직전: " + reasonCode);
+	        ordersService.updateOrderState(reasonCode);
+	        System.out.println("서비스 updateOrderState 호출 후");
 	        
 	        // 3. 성공적인 응답
 	        return ResponseEntity.ok().build();  // 성공 시 200 응답
@@ -270,4 +333,119 @@ public class StockInController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 응답
 	    }
     }
+    
+    
+    @GetMapping("/list/{ono}")
+    public String showDetailList(@PathVariable int ono, Model model) {
+        // 현재 날짜를 포맷하여 모델에 추가
+        LocalDate today = LocalDate.now();
+        String formattedDate = today.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
+        model.addAttribute("todayDate", formattedDate);
+        
+        // 입고 코드 자동 생성
+        String reasonCode = ordersService.generateNextReasonCode(ono);
+        System.out.println("Generated reason code: " + reasonCode);  // 생성된 입고 코드 로그 확인
+        model.addAttribute("reasonCode", reasonCode);
+        
+        System.out.println("reasonCode in model: " + model.getAttribute("reasonCode"));
+
+        // OrdersDto를 통해 matcd 가져오기
+        ono = Integer.parseInt("10" + ono); 
+        
+        List<OrdersDto> orders = ordersRepository.findByOnoAndOgubun(ono, "STI");
+
+        // 입고 상세 항목 데이터 조회
+        List<OrdersDto> orderList = ordersRepository.findByOno(ono);
+        List<Map<String, Object>> detailList = new ArrayList<>();
+
+        for (OrdersDto dto : orderList) {
+            Map<String, Object> row = new HashMap<>();
+            row.put("order", dto);
+
+            // 자재명 가져오기
+            if (dto.getMatcd() != null) {
+                InventoryDto inv = inventoryRepository.findByIcodeAndIgubun(dto.getMatcd(), "MAT");
+                row.put("matName", inv.getIname());
+            } else if (dto.getPrdcd() != null) {
+                InventoryDto inv = inventoryRepository.findByIcodeAndIgubun(dto.getPrdcd(), "PRD");
+                row.put("matName", inv.getIname());
+            } else if (dto.getFaccd() != null) {
+                InventoryDto inv = inventoryRepository.findByIcodeAndIgubun(dto.getFaccd(), "FAC");
+                row.put("matName", inv.getIname());
+            }
+
+            detailList.add(row);
+        }
+
+        model.addAttribute("detailList", detailList);
+
+        if (!detailList.isEmpty()) {
+            Map<String, Object> firstRow = detailList.get(0); // ✅ 올바른 방식
+            OrdersDto order2 = (OrdersDto) firstRow.get("order"); // ✅ 여기서 캐스팅
+            Integer empCd = order2.getEmpcd();
+            
+            List<Object[]> results = ordersRepository.findEmployeeWithDept(empCd);
+            if (!results.isEmpty()) {
+                Object[] empInfo = results.get(0);
+                String receiverName = (String) empInfo[0];
+                model.addAttribute("receiverName", receiverName);
+                model.addAttribute("receiverDept", empInfo[1]);
+                model.addAttribute("receiverPhone", empInfo[2]);
+            }
+        }
+        
+        if (!orders.isEmpty()) {
+            System.out.println("📦 detailList size: " + detailList.size());
+            OrdersDto order = orders.get(0);  // ✅ 이미 꺼낸 주문 객체
+
+            Integer supplierCode = order.getSupcd();  // 🔄 여기 수정됨
+
+            // ✅ 공급처 정보 1개 조회
+            ClientDto supplier = clientRepository.findSupplierByCode(supplierCode);
+            model.addAttribute("supplier", supplier);
+        }
+
+        // ✅ 입고 상세 리스트
+        List<Map<String, Object>> stockList = ordersService.getStockInData(ono);
+        
+        // stockList가 5개일 경우, 5개 항목을 채우고 나머지는 빈 객체로 추가
+        while (stockList.size() < 10) {
+            Map<String, Object> emptyItem = new HashMap<>();
+            emptyItem.put("iname", "");
+            emptyItem.put("status", "");
+            emptyItem.put("ownm", "");
+            emptyItem.put("ouprc", 0);
+            emptyItem.put("oqty", 0);
+            emptyItem.put("supply", 0);
+            emptyItem.put("tax", 0);
+            stockList.add(emptyItem);
+        }
+
+        model.addAttribute("stockList", stockList);
+
+        // ✅ 정확한 1건 입고 행 조회
+        List<OrdersDto> order1 = ordersRepository.findByOno(ono); // ocode(입고서 행번호)에 해당하는 OrdersDto 객체 한 건을 DB에서 찾아오는 코드
+        if (order1 != null) {
+            model.addAttribute("order1", order1);
+
+            // ✅ 공급처 정보 가져오기
+            OrdersDto firstOrder = order1.get(0);
+            ClientDto supplier = clientRepository.findByCgubunAndCcode("sup", firstOrder.getSupcd());
+            model.addAttribute("supplier", supplier);
+        }
+        
+        return "stockIn/list";
+    }
+    
+    // 입고 저장(불용 없을 때 전체 저장)
+    @PostMapping("/saveStockInData")
+    @ResponseBody
+    public ResponseEntity<Void> saveStockInData(@RequestBody List<OrdersDto> stockList) {
+        for (OrdersDto dto : stockList) {
+            // 저장 처리
+            ordersService.save(dto);
+        }
+        return ResponseEntity.ok().build();
+    }
+    
   }  
