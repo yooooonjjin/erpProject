@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.teamProject2.entity.OrdersDto;
 import com.teamProject2.entity.OrdersId;
@@ -249,10 +250,11 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 				List<OrdersDto> findOnlyIpgo();
 
 				// 입고 명세서 상세
-				@Query("SELECT o FROM OrdersDto o WHERE o.ocode = :ocode AND o.ogubun = 'STI'")
-				OrdersDto findByOcode(@Param("ocode") Integer ocode);
+				@Query("SELECT o FROM OrdersDto o WHERE o.ono = :ono AND o.ogubun = 'STI'")
+				OrdersDto findByOcode(@Param("ono") Integer ono);
 
-				List<Object[]> findOrderDetailsByOcode(int ocode);
+				@Query("SELECT o FROM OrdersDto o WHERE o.ono = :ono")
+				List<Object[]> findOrderDetailsByOcode(@Param("ono") Integer ono);
 				
 				@Query(value = """
 			            SELECT 
@@ -266,13 +268,13 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 			                    ELSE 'Unknown'
 			                END AS matCode,
 			                i.iname AS matName,  
-			                c.cname AS clientName,  
+			             
+			                (select cname from client where ccode = o.supcd and rownum = 1 ) AS clientName,
 			                o.omgr AS manager,  
 			                o.odate  
 			            FROM 
 			                orders o
-			            LEFT JOIN 
-			                client c ON o.supcd = c.ccode
+			           
 			            LEFT JOIN 
 			                inventory i ON (
 			                    (o.matcd = i.icode AND i.igubun = 'MAT') OR
@@ -284,6 +286,22 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 			                AND o.ono = :ono
 			            """, nativeQuery = true)
 			    List<Object[]> findStockInDetailsByOno(@Param("ono") Integer ono);
+			    
+			    
+			    // 입고 완료 상태로 업데이트
+			    @Modifying
+			    @Transactional
+			    @Query("UPDATE OrdersDto o SET o.ostate = '입고 완료' WHERE o.ocode = :ocode AND o.ogubun = 'STI'")
+			    int updateOrderState(@Param("ocode") Integer ocode);
+
+			 
+			    @Query("SELECT o.oqty FROM OrdersDto o WHERE o.ocode = :ordcd")
+			    Integer findQtyByOrdcd(@Param("ordcd") Integer ordcd);
+
+			    
+				List<OrdersDto> findAllByOnoAndOgubun(int ono, String string);
+
+
 			    
 	/** 
 	 * 수경 끝

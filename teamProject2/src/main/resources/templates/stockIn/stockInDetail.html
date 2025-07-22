@@ -57,44 +57,45 @@ $(function() {
 
  // 불용 사유 저장 버튼 클릭 시
    $('#reasonSubmitBtn').on('click', function () {
+	   
+	var reasonCode = $('#reasonCode').val();
+	   
+	var ogubun = reasonCode.substring(0,3);
+	var ono = reasonCode.substring(3);
+	ono = "1"+ono;
+	
+	   
     const reason = {
-        rgubun: "str",
-        rname: $('#requestOrder_modal input.readonly').eq(1).val(),  // 자재명
-        rdetail: $('select option:selected').text(),  // 불용 사유
-        rnote: $('textarea').val(),  // 추가적인 사유
-        rstate: "등록",
-        sticd: 1 // 입고코드 (필요 시 동적 바인딩)
+        rgubun: "STR",
+        rname: "불용",
+        rnote: $('#requestOrder_modal #reasonSelect option:selected').text(),  // 추가적인 사유
+        rdetail: $('#textarea').text(),  // 불용 사유
+        rstate: "N",
+        sticd: ono,  // 입고코드 (필요 시 동적 바인딩)	
+        rcode: ono,
+        ordcd: ono
     };
 
     $.ajax({
         type: "POST",
-        url: "/stockIn/insertReason",  // 서버에서 정의한 URL 경로와 일치해야 합니다.
+        url: "/stockIn/insertReason",  // 불용 사유 저장 후 상태 변경하는 API 호출
         contentType: "application/json",
         data: JSON.stringify(reason),
         success: function () {
-            alert("불용 사유 저장 완료");
+            alert("불용 사유 저장 및 상태 변경 완료");
 
-            // 불용 사유 저장 후 상태 변경을 반영하기 위한 AJAX 요청
-            $.ajax({
-                type: "POST",
-                url: "/stockIn/complete",  // 입고 완료 상태로 변경하는 API 호출
-                contentType: "application/json",
-                data: JSON.stringify({ ocode: reason.sticd }), // 입고 코드 전달
-                success: function (response) {
-                    // 상태가 "입고 완료"로 변경되었으므로 버튼 숨기기
-                    $('tr[data-ocode="' + reason.sticd + '"] .stockInBtn').hide();
-                    // 상태 텍스트 업데이트
-                    $('tr[data-ocode="' + reason.sticd + '"] td.stateText').text("입고 완료");
-                    // 입고 목록 페이지로 리디렉션
-                    window.location.href = '/stockIn/stockInList';  // 목록 페이지로 이동
-                },
-                error: function () {
-                    alert("입고 완료 처리 실패");
-                }
-            });
+            // 상태가 "입고 완료"로 변경되었으므로 버튼 숨기기
+            $('tr[data-ocode="' + reason.sticd + '"] .stockInBtn').hide();
+            // 상태 텍스트 업데이트
+            $('tr[data-ocode="' + reason.sticd + '"] td.stateText').text("입고 완료");
+            
+            // 입고 목록 페이지로 리디렉션
+            window.location.href = '/stockIn/stockInList';  // 목록 페이지로 이동
         },
-        error: function () {
-            alert("저장 실패");
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error('AJAX 요청 오류:', textStatus, errorThrown);
+            alert("불용 사유 저장 및 상태 변경 처리 실패");
+            console.log('Response:', jqXHR.responseText);  // 서버 응답 확인
         }
 				});
 
@@ -388,7 +389,7 @@ $(function() {
                             <label>입고 코드</label>
                         </th>
                         <td>
-                            <input type="text" th:value="${reasonCode}" class="readonly" readonly>
+                            <input type="text" id="reasonCode" th:value="${reasonCode}" class="readonly" readonly>
                         </td>
                     </tr>
                     <tr>
@@ -412,7 +413,7 @@ $(function() {
                             <label>불용 사유 선택</label>
                         </th>
                         <th class="select_box">
-                            <select>
+                            <select id="reasonSelect">
                                 <option value="0" selected>입고 사유를 선택하세요.</option>
                                 <option value="1">포장 손상 / 파손 발견</option>
                                 <option value="2">수량 부족 / 과다</option>
@@ -429,7 +430,7 @@ $(function() {
                             <label>불용 사유 상세 입력</label>
                         </th>
                         <td>
-                            <textarea placeholder="사유를 입력하세요."></textarea>
+                            <textarea id="textarea" placeholder="사유를 입력하세요."></textarea>
                         </td>
                     </tr>
                 </table>

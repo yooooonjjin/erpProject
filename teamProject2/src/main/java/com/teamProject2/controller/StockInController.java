@@ -146,8 +146,8 @@ public class StockInController {
         return "stockIn/stockInList";
     }
     
-    @GetMapping("/stockInDetail/{ocode}")
-    public String showStockInDetail(@PathVariable int ocode, Model model) {
+    @GetMapping("/stockInDetail/{ono}")
+    public String showStockInDetail(@PathVariable int ono, Model model) {
         
         // 현재 날짜를 포맷하여 모델에 추가
         LocalDate today = LocalDate.now();
@@ -155,77 +155,83 @@ public class StockInController {
         model.addAttribute("todayDate", formattedDate);
         
         // 입고 코드 자동 생성
-        String reasonCode = ordersService.generateNextReasonCode(ocode);
+        String reasonCode = ordersService.generateNextReasonCode(ono);
         System.out.println("Generated reason code: " + reasonCode);  // 생성된 입고 코드 로그 확인
         model.addAttribute("reasonCode", reasonCode);
         
+       
         System.out.println("reasonCode in model: " + model.getAttribute("reasonCode"));
 
         // OrdersDto를 통해 matcd 가져오기
-        OrdersDto order = ordersRepository.findById(new OrdersId(null, "STI", ocode)).orElse(null);
+        ono = Integer.parseInt("10" + ono); 
+        
+        // ogubun='STI'이고 ocode=xxx인 주문 1건을 조회
+        List<OrdersDto> orders = ordersRepository.findAllByOnoAndOgubun(ono, "STI");
+        if (!orders.isEmpty()) {
+            OrdersDto order = orders.get(0);  // ✅ 리스트에서 하나 꺼냄
+            System.out.println("=========="+order);
 
-        if (order != null) {
-            int matcd = order.getMatcd();  // matcd 값을 가져옴
+            int matcd = order.getMatcd();  // ✅ 리스트 전체가 아니라 하나 꺼낸 객체에서 호출
+            System.out.println("=========matcd 이름: " + matcd);
 
-         // matcd를 통해 Inventory에서 자재명(iname) 조회
+            // matcd를 통해 Inventory에서 자재명(iname) 조회
             Optional<InventoryDto> inventory = inventoryRepository.findByMatcd(matcd);
 
             // inventory가 존재하면 자재명을 가져오고, 없으면 "Unknown"으로 설정
             String itemName = inventory.map(InventoryDto::getIname).orElse("Unknown");
             System.out.println("itemName: " + itemName);  // itemName 값 로그 출력
+
             // 자재명 모델에 추가
             model.addAttribute("itemName", itemName);  // 자재명 전달
         }
 
         // 입고 상세 항목 데이터 조회
-        List<Object[]> detailList = ordersRepository.findOrderDetailsByOcode(ocode);
+        List<Object[]> detailList = ordersRepository.findOrderDetailsByOcode(ono);
         model.addAttribute("detailList", detailList);
 
         // 담당자 코드로 사원 정보 조회
         if (!detailList.isEmpty()) {
             Object[] first = detailList.get(0);
-            
-            // 배열 안에 들어 있는 타입 확인 (디버깅 용)
-            for (int i = 0; i < first.length; i++) {
-                System.out.println("🔎 index " + i + " = " + first[i] + " | type = " + first[i].getClass().getName());
-            }
-
-            // 예: OrdersDto가 0번째
             OrdersDto order2 = (OrdersDto) first[0];
-            Integer empCd = order2.getEmpcd();  // 담당자 코드
+            Integer empCd = order2.getEmpcd();
+            
+            List<Object[]> results = ordersRepository.findEmployeeWithDept(empCd);
+            if (!results.isEmpty()) {
+                Object[] empInfo = results.get(0);
+                String receiverName = (String) empInfo[0];
+                model.addAttribute("receiverName", receiverName);
+                model.addAttribute("receiverDept", empInfo[1]);
+                model.addAttribute("receiverPhone", empInfo[2]);
 
-            if (empCd == null) {
-                // null 처리
-                model.addAttribute("receiverName", "미지정");
-            } else {
-                // null이 아닐 때만 조회 수행
-                List<Object[]> results = ordersRepository.findEmployeeWithDept(empCd);
-
-                if (!results.isEmpty()) {
-                    Object[] empInfo = results.get(0);
-                    model.addAttribute("receiverName", empInfo[0]);  // 사원 이름
-                    model.addAttribute("receiverDept", empInfo[1]);  // 사원 부서
-                    model.addAttribute("receiverPhone", empInfo[2]);  // 사원 전화번호
+                // 🔍 수신처 로그 출력
+                System.out.println("수신처 이름: " + receiverName);
                 }
             }
-        }
+        
 	    
         
-	    if (order != null) {
-	    	model.addAttribute("order", order); 
-	        Integer supplierCode = order.getSupcd();
+        if (!orders.isEmpty()) {
+        	
+        	System.out.println("📦 detailList size: " + detailList.size());
+            OrdersDto order = orders.get(0);  // ✅ 이미 꺼낸 주문 객체
 
-	        // ✅ 공급처 정보 1개 조회
-	        ClientDto supplier = clientRepository.findSupplierByCode(supplierCode);
-	        model.addAttribute("supplier", supplier);
-	    }
+            Integer supplierCode = order.getSupcd();  // 🔄 여기 수정됨
+
+            // ✅ 공급처 정보 1개 조회
+            ClientDto supplier = clientRepository.findSupplierByCode(supplierCode);
+
+            System.out.println("공급처 코드: " + supplierCode);
+            System.out.println("공급처 이름: " + (supplier != null ? supplier.getCname() : "없음"));
+
+            model.addAttribute("supplier", supplier);
+        }
 
 	    // ✅ 입고 상세 리스트
 	    List<Map<String, Object>> stockList = ordersService.getStockInData();
 	    model.addAttribute("stockList", stockList);
 	      
         // ✅ 정확한 1건 입고 행 조회
-        OrdersDto order1 = ordersRepository.findByOcode(ocode);		// ocode(입고서 행번호)에 해당하는 OrdersDto 객체 한 건을 DB에서 찾아오는 코드 		// 또는 findById()로 대체 가능
+        OrdersDto order1 = ordersRepository.findByOcode(ono);		// ocode(입고서 행번호)에 해당하는 OrdersDto 객체 한 건을 DB에서 찾아오는 코드 		// 또는 findById()로 대체 가능
         if (order1 != null) {
             model.addAttribute("order1", order1);
             
@@ -236,59 +242,35 @@ public class StockInController {
         }
         
         
+		// 불용 사유 입력 화면	-> 예시: ReasonDto를 가져옴 (DB에서 가져오거나 임의 생성)
+        // ocode에 해당하는 불용 사유 조회
+        Optional<ReasonDto> reasonOpt = reasonService.getReasonByOrderCode(ono);
+        if (reasonOpt.isPresent()) {
+            model.addAttribute("reason", reasonOpt.get());
+        } else {
+            model.addAttribute("reason", "불용 사유가 없습니다.");
+        }
 		
 	    return "stockIn/stockInDetail";
 	}
     
-    
-
-}
-
-	/*
-	 
-	// 입고 저장(불용 없을 때 전체 저장)
-	 @PostMapping("/insertOrders")
-	    public ResponseEntity<Void> insertStockIn(@RequestBody List<OrdersDto> data) {
-		 System.out.println("🔥 [컨트롤러 진입 성공] dtoList size: " + data.size());
-		 for (OrdersDto dto : data) {
-		        System.out.println("➡️ 입고 행: ono={}, ocode={}, oqty={}, ogubun={}, matcd={}" +
-		                 dto.getOno()+ ","+dto.getOcode()+ ","+ dto.getOqty()+  ","+dto.getOgubun()+  ","+dto.getMatcd() );
-		    }
-	        ordersService.saveAll(data);
-	        return ResponseEntity.ok().build();
+    // 불용 사유 저장 후 상태 변경
+    @PostMapping("/insertReason")
+    @ResponseBody
+    public ResponseEntity<Void> insertReason(@RequestBody ReasonDto reasonDto) {
+        Integer reasonCode = reasonDto.getSticd();  // ReasonDto에서 ocode (sticd) 값 받기
+        try {
+	        // 1. 불용 사유 저장 후 상태 변경
+	        ordersService.insertReasonAndUpdateState(reasonDto, reasonCode);
+	        
+	        // 2. 주문 상태를 "입고 완료"로 업데이트
+	        ordersService.updateOrderState(reasonCode);	// 
+	        
+	        // 3. 성공적인 응답
+	        return ResponseEntity.ok().build();  // 성공 시 200 응답
+	    } catch (Exception e) {
+	        // 예외 처리: 실패한 경우 적절한 에러 응답 반환
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 응답
 	    }
-	 
-	 
-	*/
-	
-	/*
-	@PostMapping("/reason/insert")
-	@ResponseBody
-	public ResponseEntity<?> insertReason(@RequestBody ReasonDto reasonDto) {
-	    reasonService.save(reasonDto); // DB 저장
-	    return ResponseEntity.ok().build();
-	}
-	
-	*/
-	
-	
-	// ✅입고 목록에서 입고 버튼 누르면 입고 명세서 화면으로 이동 / 입고 명세서에서 입고 눌렀을때 불용이 하나라도 있으면 불용 사유 입력 창으로
-	// ✅입고 수량 : input /  입고명세서 공급처 부분 : 발주테이블  데이터를 보내주면 그걸 받아서 supcd 로 불러오기
-	// ✅수신처 연동
-	// ✅입고코드(입고 명세서) = (입고 목록) 입고 코드
-	// ✅입고 일자 = 입고 명세서 작성한 날짜 (오늘로 찍히게)
-	// ✅자재 코드 : MATCD, PRDCD, FACCD 중 코드가 null 값이 아닌 코드를 자재 테이블 코드랑 똑같은 코드+숫자
-	
-	// 입고 버튼 : "가용"일 때 입고 목록에 추가되게 하기("입고 완료")
-	// 불용 사유 테이블 : 입고 코드 & 자재명 가져오기 / 신청 누르면 입고 목록에 추가되게 하기("입고 완료")
-	
-	// 자재 리스트 : 발주 테이블에서 입고 코드 기준 MATCD, PRDCD, FACCD 중 코드가 null 값이 아닌 코드를 자재 테이블 코드랑 똑같은 코드의 자재명
-	// 모달창 데이터 불러오기
-	    
-	    
-	// 입고 완료 상태 : 조건
-	
-	// http://localhost:8022/stockIn 으로 입고 목록 뜨게
-	
-	
-
+    }
+  }  

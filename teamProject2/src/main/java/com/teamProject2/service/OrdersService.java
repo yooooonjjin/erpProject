@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.teamProject2.entity.ReasonDto;
+import com.teamProject2.service.ReasonService;
 import com.teamProject2.entity.ClientDto;
 import com.teamProject2.entity.OrdersDto;
 import com.teamProject2.repository.ClientRepository;
@@ -34,11 +35,13 @@ public class OrdersService {
 	public final ClientRepository clientRepository;	
 	public final InventoryRepository inventoryRepository;
 	public final ReasonRepository reasonRepository;
-	public OrdersService(OrdersRepository ordersRepository,ClientRepository clientRepository,InventoryRepository inventoryRepository,ReasonRepository reasonRepository) {
+	private final ReasonService reasonService;
+	public OrdersService(OrdersRepository ordersRepository,ClientRepository clientRepository,InventoryRepository inventoryRepository,ReasonRepository reasonRepository, ReasonService reasonService) {
 		this.ordersRepository = ordersRepository;
 		this.clientRepository = clientRepository;
 		this.inventoryRepository = inventoryRepository;
 		this.reasonRepository = reasonRepository;
+		this.reasonService = reasonService;
 	}
 	
 	/**
@@ -514,11 +517,13 @@ public class OrdersService {
     	}
 
     	
-    	// 입고
+    	/**
+    	 * 입고
+    	 */
     	// 입고 코드 생성 (ogubun + ono 형태로)
     	public String generateNextReasonCode(int ocode) {
     	    // 입고 코드 생성 로직 확인
-    	    String reasonCode = "STI" + String.format("%04d", ocode);  // 예시로 ocode 기반 입고 코드 생성
+    	    String reasonCode = "STI" + String.format("%03d", ocode);  // 예시로 ocode 기반 입고 코드 생성
     	    return reasonCode;
     	}
 
@@ -568,6 +573,33 @@ public class OrdersService {
     	        return ordersRepository.findByOcode(ocode); // ocode로 주문 데이터 조회
     	    }
 
+    	    // 불용 사유 저장 후 상태 변경
+    	    public void insertReasonAndUpdateState(ReasonDto reasonDto, Integer ocode) {
+    	        // 1. 불용 사유 저장
+    	        reasonService.save(reasonDto);
+    	        // 2. 주문 상태 업데이트
+    	        updateOrderState(ocode);
+    	    }
+
+    	    // 주문 상태 변경
+    	    @Transactional
+    	    public void updateOrderState(Integer ocode) {
+    	        
+    	        OrdersDto order = ordersRepository.findByOcode(ocode);
+    	        
+    	        // findByOcode가 반환하는 값 확인
+    	        if (order == null) {
+    	            throw new RuntimeException("주문을 찾을 수 없습니다. ocode: " + ocode);
+    	        }
+
+    	        // 상태를 "입고 완료"로 업데이트
+    	        order.setOstate("입고 완료");
+    	        order.setOidate(new Timestamp(System.currentTimeMillis()));  // 입고 일자 갱신 (현재 시간)
+
+    	        // 변경된 상태 저장
+    	        ordersRepository.save(order);
+    	        ordersRepository.updateOrderState(ocode);
+    	    }
     	   
 
 
