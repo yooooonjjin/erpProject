@@ -8,100 +8,10 @@
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <script src="/js/stockInDetail.js"></script>
   <script src="/js/main.js"></script>
 <script>
-$(function() {
 
-    $('.openModalBtn').on('click', function () {
-        $('#requestOrder_modal').removeClass('hidden');
-    });
-
-    // 모달 닫기 버튼
-    $('#closeModalBtn, #cancelModalBtn').on('click', function () {
-        $('#requestOrder_modal').addClass('hidden');
-    });
-    
-    $(document).on('input', '.stiQtyInput', calcTotals);
-
-    // 페이지 로드 후 한 번 계산
-    $(document).ready(calcTotals);
-
-    // "불용" 상태 체크 후 자재명 자동 설정
-    $('.blue_btn').on('click', function () {
-        let hasDisuse = false;
-        let disuseItemName = '';  // 자재명 변수
-        let stockList = [];
-
-        $('#stockBody tr').each(function () {
-            const status = $(this).find('td:eq(2) select option:selected').text().trim();
-            const itemName = $(this).find('td:eq(1)').text();  // 자재명
-            const qty = $(this).find('.stiQtyInput').val();
-
-            if (status === '불용') {
-                hasDisuse = true;
-                disuseItemName = itemName;  // 자재명 저장
-                return false;  // 첫 번째 불용 아이템에서만 멈추기
-            }
-        });
-
-        if (hasDisuse) {
-            // 모달 열기 및 자재명 자동 입력
-            $('#requestOrder_modal').removeClass('hidden');
-            $('#requestOrder_modal input.readonly').eq(1).val(disuseItemName);  // 자재명 설정
-        } else {
-            // 서버에 입고 등록 요청 후 리스트로 이동
-            // 👉 여기에 form 전송이나 fetch, AJAX로 처리
-            location.href = '/stockIn/stockInList'; // 예시
-        }
-    });
-
- // 불용 사유 저장 버튼 클릭 시
-   $('#reasonSubmitBtn').on('click', function () {
-	   
-	var reasonCode = $('#reasonCode').val();
-	   
-	var ogubun = reasonCode.substring(0,3);
-	var ono = reasonCode.substring(3);
-	ono = "1"+ono;
-	
-    const reason = {
-        rgubun: "STR",
-        rname: "불용",
-        rnote: $('#requestOrder_modal #reasonSelect option:selected').text(),  // 추가적인 사유
-        rdetail: $('#textarea').text(),  // 불용 사유
-        rstate: "N",
-        sticd: ono,  // 입고코드 (필요 시 동적 바인딩)	
-        rcode: ono,
-        ordcd: ono
-    };
-
-    $.ajax({
-        type: "POST",
-        url: "/stockIn/insertReason",  // 불용 사유 저장 후 상태 변경하는 API 호출
-        contentType: "application/json",
-        data: JSON.stringify(reason),
-        success: function () {
-            alert("불용 사유 저장 및 상태 변경 완료");
-
-            // 상태가 "입고 완료"로 변경되었으므로 버튼 숨기기
-            $('tr[data-ocode="' + reason.sticd + '"] .stockInBtn').hide();
-            // 상태 텍스트 업데이트
-            $('tr[data-ocode="' + reason.sticd + '"] td.stateText').text("입고 완료");
-            
-            // 입고 목록 페이지로 리디렉션
-            window.location.href = '/stockIn/stockInList';  // 목록 페이지로 이동
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.error('AJAX 요청 오류:', textStatus, errorThrown);
-            alert("불용 사유 저장 및 상태 변경 처리 실패");
-            console.log('Response:', jqXHR.responseText);  // 서버 응답 확인
-        }
-				});
-
-    		
-	});
-});
-    
 </script>
 
 </head>
@@ -254,14 +164,14 @@ $(function() {
                      <table class="table1" id="stockTable">
 				        <colgroup>
 				          <col width="5%"/>
-				          <col width="20%"/>
-				          <col width="10%"/>
-				          <col width="12%"/>
 				          <col width="15%"/>
-				          <col width="10%"/>
 				          <col width="10%"/>
 				          <col width="15%"/>
 				          <col width="15%"/>
+				          <col width="10%"/>
+				          <col width="15%"/>
+				          <col width="15%"/>
+				          <col width="10%"/>
 				        </colgroup>
                         <thead>
                             <tr>
@@ -277,40 +187,62 @@ $(function() {
                             </tr>
                         </thead>
                         <tbody id="stockBody">
+						  <!-- stockList를 each로 반복, item은 Map<String, Object> 타입 가정 -->
 						  <tr th:each="item, stat : ${stockList}"
-							  th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
+						      th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
+						    
+						    <!-- 인덱스 (1부터 시작) -->
 						    <td th:text="${stat.index + 1}"></td>
+						    
+						    <!-- 자재명 -->
 						    <td th:text="${item['iname']}"></td>
+						    
+						    <!-- 상태 select -->
 						    <td>
-						      <select name="status">
-						        <option th:selected="${item.status} == '가용'">가용</option>
-						        <option th:selected="${item.status} == '불용'">불용</option>
+						      <select name="status" th:value="${item['status']}">
+						        <option value="가용" th:selected="${item['status'] == '가용'}">가용</option>
+						        <option value="불용" th:selected="${item['status'] == '불용'}">불용</option>
 						      </select>
 						    </td>
+						    
+						    <!-- 창고 select -->
 						    <td>
-							    <select name="ownm">
-								  <option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
-								  <option value="B 창고" th:selected="${item['ownm'] == 'B 창고'}">B 창고</option>
-								</select>
+						      <select name="ownm" th:value="${item['ownm']}">
+						        <option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
+						        <option value="B 창고" th:selected="${item['ownm'] == 'B 창고'}">B 창고</option>
+						      </select>
 						    </td>
-						    <td class="price" th:text="${#numbers.formatInteger(item['ouprc'], 3, 'COMMA')} + '원'"></td>
+						    
+						    
+						    <!-- 주문 수량 -->
 						    <td class="ordqty" th:text="${item['oqty']} + '개'"></td>
+						    
+						    <!-- 단가 -->
+						    <td class="price" th:text="|${#numbers.formatInteger(item['ouprc'], 3, 'COMMA')}원|">0원</td>
+						    
+						    
+						    <!-- 입고 수량 입력 -->
 						    <td class="stiqty">
-						    	<input type="number" class="stiQtyInput" min="0" style="width: 60px;" />
-  								<span class="unit">개</span>
-  							</td>
+						      <input type="number" class="stiQtyInput" min="0" style="width: 60px;" />
+						      <span class="unit">개</span>
+						    </td>
+						    
+						    <!-- 공급가액 -->
 						    <td class="supply" th:text="${#numbers.formatInteger(item['supply'], 3, 'COMMA')}"></td>
+						    
+						    <!-- 세액 -->
 						    <td class="tax" th:text="${#numbers.formatInteger(item['tax'], 3, 'COMMA')}"></td>
 						  </tr>
-                            
-                            <tr class="table_total">
-							    <td colspan="5">합계</td>
-							    <td id="totalOrdQty" class="totalOrdQty"></td>
-							    <td id="totalStiQty" class="totalStiQty"></td>
-							    <td id="totalSupply" class="totalSupply"></td>
-							    <td id="totalTax" class="totalTax"></td>
-							</tr>
-                        </tbody>
+						  
+						  <!-- 합계 행 -->
+						  <tr class="table_total">
+						    <td colspan="5">합계</td>
+						    <td id="totalOrdQty" class="totalOrdQty"></td>
+						    <td id="totalStiQty" class="totalStiQty"></td>
+						    <td id="totalSupply" class="totalSupply"></td>
+						    <td id="totalTax" class="totalTax"></td>
+						  </tr>
+						</tbody>
                     </table>
                 </div>
                 <div class="ord_ucon">
@@ -318,7 +250,7 @@ $(function() {
                         <tr>
                             <th>특이사항</th>
                             <td>
-                                <textarea placeholder="특이사항을 입력해주세요."></textarea>
+                                <textarea id="textarea" placeholder="특이사항을 입력해주세요."></textarea>
                             </td>
                         </tr>
                     </table>
@@ -331,11 +263,113 @@ $(function() {
         </div>
         <!-- 컨텐츠 영역 끝 -->
 
-        
+         <script src="/js/stockInDetail.js"></script>
     </section>
     <!-- section 컨텐츠 영역 끝 -->
 
 	<script>
+	
+	$(function() {
+		
+		$('#insertBtn').on('click', function () {
+		    console.log("✅ insertBtn 클릭됨");
+		});
+
+	    $('.openModalBtn').on('click', function () {
+	        $('#requestOrder_modal').removeClass('hidden');
+	    });
+
+	    // 모달 닫기 버튼
+	    $('#closeModalBtn, #cancelModalBtn').on('click', function () {
+	        $('#requestOrder_modal').addClass('hidden');
+	    });
+	    
+	    $(document).on('input', '.stiQtyInput', calcTotals);
+
+	    // 페이지 로드 후 한 번 계산
+	    $(document).ready(calcTotals);
+
+	    // "불용" 상태 체크 후 자재명 자동 설정
+	    $('.blue_btn').on('click', function () {
+	    	console.log("✅ 입고 버튼 클릭됨"); // 🔥 이게 안 찍히면 버튼 연결 문제!
+	        
+	        let hasDisuse = false;
+	        let disuseItemName = "";
+
+	        $('#stockBody tr').each(function () {
+	            const status = $(this).find('td:eq(2) select option:selected').val();
+	            const itemName = $(this).find('td:eq(1)').text().trim();
+
+	            console.log("🔍 상태:", status, "| 자재명:", itemName);
+
+	            if (status === '불용') {
+	                hasDisuse = true;
+	                disuseItemName = itemName;
+	                return false; // 반복 중단
+	            }
+	        });
+
+	        if (hasDisuse) {
+	            console.log("⚠️ 불용 감지 → 모달 열기");
+	            $('#requestOrder_modal').removeClass('hidden');
+	            $('#requestOrder_modal input.readonly').eq(1).val(disuseItemName);
+	        } else {
+	            console.log("✅ 가용만 있음 → AJAX 저장 시작");
+
+	            // 여기에 입고 수량 유효성 검사 + AJAX 전송 로직
+	        
+	        }
+	    });
+
+	 // 불용 사유 저장 버튼 클릭 시
+	   $('#reasonSubmitBtn').on('click', function () {
+		   
+		var reasonCode = $('#reasonCode').val();
+		   
+		var ogubun = reasonCode.substring(0,3);
+		var ono = reasonCode.substring(3);
+		ono = "1"+ono;
+		
+	    const reason = {
+	        rgubun: "STR",
+	        rname: "불용",
+	        rnote: $('#requestOrder_modal #reasonSelect option:selected').text(),  // 추가적인 사유
+	        rdetail: $('#textarea').text(),  // 불용 사유
+	        rstate: "N",
+	        sticd: ono,  // 입고코드 (필요 시 동적 바인딩)	
+	        rcode: ono,
+	        ordcd: ono
+	    };
+
+	    $.ajax({
+	        type: "POST",
+	        url: "/stockIn/insertReason",  // 불용 사유 저장 후 상태 변경하는 API 호출
+	        contentType: "application/json",
+	        data: JSON.stringify(reason),
+	        success: function () {
+	            alert("불용 사유 저장 및 상태 변경 완료");
+
+	            // 상태가 "입고 완료"로 변경되었으므로 버튼 숨기기
+	            $('tr[data-ocode="' + reason.sticd + '"] .stockInBtn').hide();
+	            // 상태 텍스트 업데이트
+	            $('tr[data-ocode="' + reason.sticd + '"] td.stateText').text("입고 완료");
+	            
+	            // 입고 목록 페이지로 리디렉션
+	            window.location.href = '/stockIn/stockInList';  // 목록 페이지로 이동
+	        },
+	        error: function (jqXHR, textStatus, errorThrown) {
+	            console.error('AJAX 요청 오류:', textStatus, errorThrown);
+	            alert("불용 사유 저장 및 상태 변경 처리 실패");
+	            console.log('Response:', jqXHR.responseText);  // 서버 응답 확인
+	        }
+					});
+
+	    		
+		});
+	});
+	    
+	
+	
 	function calcTotals() {
 		  let totalOrdQty = 0;
 		  let totalStiQty = 0;

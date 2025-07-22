@@ -73,6 +73,21 @@
 	                }
           
             });
+            
+            $(".clickable-state").on("click", function () {
+                const reasonCode = $(this).data("reasoncode");
+                if (reasonCode) {
+                    window.location.href = `/stockIn/stockInDetail/' + this.getAttribute('data-reasonCode')`;
+                }
+            });
+
+            // 입고 완료 클릭 (리스트 페이지 이동)
+            $(".clickable-complete").on("click", function () {
+                const listUrl = $(this).data("listurl");
+                if (listUrl) {
+                    window.location.href = '/stockIn/list';
+                }
+            });
         });
     });
 </script>
@@ -220,7 +235,6 @@
                         <col width="10%"/>
                         <col width="15%"/>
                         <col width="10%"/>
-                        <col width="10%"/>
                     </colgroup>
                     <thead>
                         <tr>
@@ -232,7 +246,6 @@
                             <th>수량</th>
                             <th>거래처명</th>
                             <th>담당자</th>
-                            <th>입고</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -241,26 +254,32 @@
 						    <td th:text="${row.reasonCode}"></td> <!-- 입고 코드 -->
 						    <td th:text="${#dates.format(row.odate, 'yyyy-MM-dd')}"></td>
 						    <td>
-                              <a th:text="${row.stateText}" 
-				       th:class="'state ' +
-				       (${row.stateText} == '입고 대기' ? 'statusWaiting' :
-				       (${row.stateText} == '입고 완료' ? 'statusApproved' :
-				       (${row.stateText} == '입고중' ? 'statusInProgress' : '')))">
-				    </a>
+			                    <!-- 입고 대기 상태 -->
+								<a th:if="${row.stateText == '입고 대기'}"
+								   th:text="${row.stateText}"
+								   th:class="'state statusWaiting clickable-state'"
+								   th:href="@{/stockIn/stockInDetail/{ono}(ono=${row.reasonCode.substring(row.reasonCode.length() - 3)})}">
+								</a>
+								
+								<!-- 입고 완료 상태 -->
+								<a th:if="${row.stateText == '입고 완료'}"
+								   th:text="${row.stateText}"
+								   th:class="'state statusApproved clickable-complete'"
+								   th:href="@{/stockIn/list/{ono}(ono=${row.reasonCode.substring(row.reasonCode.length() - 3)})}">
+								</a>
+								
+								<!-- 입고중 상태 -->
+								<a th:if="${row.stateText == '입고중'}"
+								   th:text="${row.stateText}"
+								   th:href="@{/stockIn/stockInDetail/{ono}(ono=${row.reasonCode.substring(row.reasonCode.length() - 3)})}">
+								</a>
                            </td>  
 						    <td th:text="${row.matCode}"></td> <!-- 자재 코드 -->
 						    <td th:text="${row.matName}"></td> <!-- 자재명 -->
 						    <td th:text="${row.qtyWithUnit}"></td> <!-- 수량 + 단위 -->
 						    <td th:text="${row.clientName}"></td> <!-- 거래처명 -->
 						    <td th:text="${row.manager}"></td> <!-- 담당자 -->
-						    <td>
-						         <button type="button" class="openModalBtn blue_btn" 
-					                th:if="${row.stateText != '입고 완료'}"
-					                th:data-reasonCode="${row.reasonCode.substring(3)}" 
-					                onclick="location.href='/stockIn/stockInDetail/' + this.getAttribute('data-reasonCode')">
-        입고</button>	<!-- 입고가 아직 완료되지 않은 항목만 "입고" 버튼 -->
-						                
-						    </td>
+						    
 						</tr>
 												
                     </tbody>

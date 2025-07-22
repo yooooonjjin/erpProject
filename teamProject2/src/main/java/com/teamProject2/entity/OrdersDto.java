@@ -76,6 +76,9 @@ public class OrdersDto {
     @Column(length = 100,name = "ONOTE")
     private String onote;  
     
+    @Column(name = "STIQTY")
+    private String stiqty;	// 입고 수량
+    
     @Column(name = "OSUPRC")
     private Integer osuprc;  // 한 줄 당 공급가액
     
