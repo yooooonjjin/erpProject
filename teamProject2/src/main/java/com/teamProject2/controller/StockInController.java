@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.teamProject2.entity.ReasonDto;
 import com.teamProject2.repository.ClientRepository;
@@ -40,7 +39,6 @@ import com.teamProject2.service.OrdersService;
 import com.teamProject2.service.ReasonService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/stockIn")
@@ -126,12 +124,21 @@ public class StockInController {
             String matCode = (String) row[3];
             map.put("matCode", matCode != null ? matCode : "Unknown matCode");
 
-            map.put("stateText", row[1]);
+         // 상태
+            String state = (String) row[1];
+            map.put("stateText", state);
+
             map.put("qtyWithUnit", row[2] + "개");
-            map.put("matCode", row[3]);
             map.put("matName", row[4]);
             map.put("clientName", row[5]);
-            map.put("manager", row[6]);
+
+            // 상태가 입고 완료면 담당자 → 최길동
+            if ("입고 완료".equals(state)) {
+                map.put("manager", "최길동");
+            } else {
+                map.put("manager", row[6]);
+            }
+
             map.put("odate", row[7]);
 
             mappedList.add(map);
@@ -311,6 +318,17 @@ public class StockInController {
 	    return "stockIn/stockInDetail";
 	}
     
+ // 입고 저장(불용 없을 때 전체 저장)
+    @PostMapping("/saveStockInData")
+    @ResponseBody
+    public ResponseEntity<Void> saveStockInData(@RequestBody List<OrdersDto> stockList) {
+        for (OrdersDto dto : stockList) {
+            // 저장 처리
+            ordersService.save(dto);
+        }
+        return ResponseEntity.ok().build();
+    }
+    
     // 불용 사유 저장 후 상태 변경
     @PostMapping("/insertReason")
     @ResponseBody
@@ -322,9 +340,7 @@ public class StockInController {
 	        ordersService.insertReasonAndUpdateState(reasonDto, reasonCode);
 	        
 	        // 2. 주문 상태를 "입고 완료"로 업데이트
-	        System.out.println("서비스 updateOrderState 호출 직전: " + reasonCode);
 	        ordersService.updateOrderState(reasonCode);
-	        System.out.println("서비스 updateOrderState 호출 후");
 	        
 	        // 3. 성공적인 응답
 	        return ResponseEntity.ok().build();  // 성공 시 200 응답
@@ -437,15 +453,36 @@ public class StockInController {
         return "stockIn/list";
     }
     
-    // 입고 저장(불용 없을 때 전체 저장)
-    @PostMapping("/saveStockInData")
-    @ResponseBody
-    public ResponseEntity<Void> saveStockInData(@RequestBody List<OrdersDto> stockList) {
-        for (OrdersDto dto : stockList) {
-            // 저장 처리
-            ordersService.save(dto);
-        }
-        return ResponseEntity.ok().build();
-    }
+    
     
   }  
+
+
+//입고 완료 = 담당자가 입고 담당자 이름으로 바뀌게
+//stockInDetail 업데이트
+
+/*
+
+	// 입고 저장(불용 없을 때 전체 저장)
+	 @PostMapping("/insertOrders")
+	    public ResponseEntity<Void> insertStockIn(@RequestBody List<OrdersDto> data) {
+		 System.out.println("🔥 [컨트롤러 진입 성공] dtoList size: " + data.size());
+		 for (OrdersDto dto : data) {
+		        System.out.println("➡️ 입고 행: ono={}, ocode={}, oqty={}, ogubun={}, matcd={}" +
+		                 dto.getOno()+ ","+dto.getOcode()+ ","+ dto.getOqty()+  ","+dto.getOgubun()+  ","+dto.getMatcd() );
+		    }
+	        ordersService.saveAll(data);
+	        return ResponseEntity.ok().build();
+	    }
+	 
+
+	
+	
+	@PostMapping("/reason/insert")
+	@ResponseBody
+	public ResponseEntity<?> insertReason(@RequestBody ReasonDto reasonDto) {
+	    reasonService.save(reasonDto); // DB 저장
+	    return ResponseEntity.ok().build();
+	}
+	
+	*/

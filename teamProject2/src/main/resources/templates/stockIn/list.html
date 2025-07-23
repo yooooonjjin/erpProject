@@ -12,7 +12,12 @@
 <script>
     
 </script>
-
+<style>
+    /* select 박스를 숨기기 */
+    .hidden-select {
+        display: none;
+    }
+</style>
 </head>
 <body>
 
@@ -194,11 +199,11 @@
 						    <td th:text="${stat.index + 1}"></td>
 						    
 						    <!-- 자재명 -->
-						    <td th:text="${item['iname']}"></td>
+						    <td th:text="${item['iname'] != '' ? item['iname'] : ''}"></td>
 						    
 						    <!-- 상태 select -->
 						    <td>
-						      <select name="status" th:value="${item['status']}" readonly>
+						      <select name="status" th:class="${item['status'] == ''} ? 'hidden-select' : ''" th:value="${item['status']}" readonly>
 						        <option value="가용" th:selected="${item['status'] == '가용'}">가용</option>
 						        <option value="불용" th:selected="${item['status'] == '불용'}">불용</option>
 						      </select>
@@ -206,26 +211,28 @@
 						    
 						    <!-- 창고 select -->
 						    <td>
-						      <select name="ownm" th:value="${item['ownm']}" readonly
->						        <option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
+						      <select name="ownm" th:class="${item['ownm'] == ''} ? 'hidden-select' : ''" th:value="${item['ownm']}" readonly>
+						      	<option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
 						        <option value="B 창고" th:selected="${item['ownm'] == 'B 창고'}">B 창고</option>
 						      </select>
 						    </td>
 						    
 						    <!-- 단가 -->
-						    <td class="price" th:text="${#numbers.formatInteger(item['ouprc'], 3, 'COMMA')} + '원'"></td>
+						    <td th:text="${item['ouprc'] != 0 ? #numbers.formatInteger(item['ouprc'], 3, 'COMMA') + '원' : ''}"></td>
 						    
 						    <!-- 주문 수량 -->
-						    <td class="ordqty" th:text="${item['oqty']} + '개'"></td>
+						    <td class="ordqty" th:text="${item['oqty'] != 0 ? item['oqty'] + '개' : ''}"></td>
 						    
 						    <!-- 입고 수량 입력 -->
 						    <td class="stiqty">
-						      <input type="number" class="stiQtyInput" min="0" style="width: 60px;" readonly/>
-						      <span class="unit">개</span>
+						      <input type="number" class="stiQtyInput" min="0" style="width: 60px;" 
+						    						th:value="${item['oqty'] != 0 ? item['oqty'] : ''}" 
+                   									th:if="${item['oqty'] != 0}"/>
+  								 <span th:if="${item['oqty'] == 0}"></span>
 						    </td>
 						    
 						    <!-- 공급가액 -->
-						    <td class="supply" th:text="${#numbers.formatInteger(item['supply'], 3, 'COMMA')}"></td>
+						    <td class="supply" th:text="${item['supply'] != 0 ? #numbers.formatInteger(item['supply'], 3, 'COMMA') : ''}"></td>
 						    
 						    <!-- 세액 -->
 						    <td class="tax" th:text="${#numbers.formatInteger(item['tax'], 3, 'COMMA')}"></td>

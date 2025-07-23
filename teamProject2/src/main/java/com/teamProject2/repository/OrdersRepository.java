@@ -304,19 +304,11 @@ public interface OrdersRepository extends JpaRepository<OrdersDto, OrdersId> {
 			    @Transactional
 			    @Query("UPDATE OrdersDto o SET o.ostate = '입고 완료' WHERE o.ono = :ono AND o.ogubun = 'STI'")
 			    int updateOrderState(@Param("ono") Integer ono);
-			    
-				@Modifying
-				//	@Query("UPDATE OrdersDto o SET o.ostate = '입고 완료', o.oidate = CURRENT_TIMESTAMP WHERE o.ocode = :ocode")
-				//	void updateOrderState(@Param("ocode") Integer ocode);
-
 			 
 			    @Query("SELECT o.oqty FROM OrdersDto o WHERE o.ono = :ordcd")
 			    Integer findQtyByOrdcd(@Param("ordcd") Integer ordcd);
 
-				//List<OrdersDto> findByOnoAndOgubun(Integer ono, String string);
 
-
-				
 
 			    
 		/** 

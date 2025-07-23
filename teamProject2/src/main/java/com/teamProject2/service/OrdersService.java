@@ -521,7 +521,9 @@ public class OrdersService {
     	
     	
     	/**
+    	 * 
     	 * 입고
+    	 * 
     	 */
     	// 입고 코드 생성 (ogubun + ono 형태로)
     	public String generateNextReasonCode(int ocode) {
@@ -589,22 +591,21 @@ public class OrdersService {
     	    // 주문 상태 변경
     	    @Transactional
     	    public void updateOrderState(Integer ono) {
-    	        System.out.println("Finding order with ono: " + ono);
-    	        List<OrdersDto> orderList = ordersRepository.findByOno(ono);
+    	    	List<OrdersDto> orderList = ordersRepository.findByOno(ono);
     	        if (orderList == null || orderList.isEmpty()) {
-    	            System.out.println("주문을 찾을 수 없습니다. ono: " + ono);
     	            throw new RuntimeException("주문을 찾을 수 없습니다. ono: " + ono);
     	        }
-
-    	        System.out.println("🔍 주문을 찾았음: " + ono);
 
     	        for (OrdersDto order : orderList) {
     	            order.setOstate("입고 완료");
     	            order.setOidate(new Timestamp(System.currentTimeMillis()));
+
+    	            // 👇 조건 없이 무조건 최길동(1005)으로 담당자 변경
+    	            order.setEmpcd(1005);
+
     	            ordersRepository.save(order);
     	        }
 
-    	        System.out.println("==============ono = " + ono);
     	    }
 
     	    public void save(OrdersDto dto) {
@@ -629,7 +630,5 @@ public class OrdersService {
     	            ordersRepository.save(order); // 저장
     	        }
     		}
-    	   
-
 
 } 
