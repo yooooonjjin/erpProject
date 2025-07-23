@@ -37,6 +37,7 @@ import com.teamProject2.service.OrdersService;
 import com.teamProject2.service.ReasonService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/stockIn")
@@ -129,11 +130,8 @@ public class StockInController {
             String matCode = (String) row[3];
             map.put("matCode", matCode != null ? matCode : "Unknown matCode");
 
-<<<<<<< HEAD
-            // 상태
-=======
+
          // 상태
->>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
             String state = (String) row[1];
             map.put("stateText", state);
 
@@ -464,7 +462,7 @@ public class StockInController {
         return "stockIn/list";
     }
     
-<<<<<<< HEAD
+
     // 입고 저장(불용 없을 때 전체 저장)
     @PostMapping("/saveStockInData")
     @ResponseBody
@@ -481,8 +479,6 @@ public class StockInController {
         }
         return ResponseEntity.ok().build();
     }
-=======
->>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
     
     
   }  
