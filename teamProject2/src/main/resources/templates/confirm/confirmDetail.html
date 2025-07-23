@@ -5,155 +5,251 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>ERP 프로젝트</title>
 	<link rel="stylesheet" href="/css/total.css" />
+	<link rel="stylesheet" href="/css/jquery-ui.css" />	
 	<script src="/js/jquery-3.7.1.min.js"></script>
-	<script src="/js/jquery.min.js"></script>
-	<script src="/js/main.js"></script>
+  	<script src="/js/main.js"></script>
+  	<script src="/js/jquery-ui.js"></script>
+
 </head>
-<script>
-	function goToList() {
-		location = "/confirm";
-	}
-</script>
 <body>
 
-	<!-- header 헤더 시작 -->
-	<header th:replace="fragments/header"></header>
+    <!-- header 헤더 시작 -->
+    <header th:insert="~{fragments/header}"></header>
     <!-- header 헤더 끝 -->
 
 	<!-- section 컨텐츠 영역 시작 -->
     <section id="section">
         <!-- 죄측 메뉴바 시작 -->
-        <aside th:replace="fragments/aside"></aside>
+		<aside th:insert="~{fragments/aside}"></aside>
         <!-- 죄측 메뉴바 끝 -->
 
         <!-- 컨텐츠 영역 시작 -->
-        <div id="contents">
-            <div class="con_title">
-                <h2>결재 상세보기</h2>
-            </div>
-            <div class="table_wrap">
-                <table class="table2">
-                    <tr>
-                        <th>
-                            <label>발주번호</label>
-                        </th>
-                        <td>
-                            <input type="text" th:value="${orderDto.cate}+${orderDto.code}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>신청일자</label>
-                        </th>
-                        <td>
-                            <input type="text" class="readonly" 
-                            	   th:value="${#dates.format(orderDto.rdate, 'yyyy-MM-dd')}" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>상태</label>
-                        </th>
-                        <td>
-                            <input type="text" class="readonly"
-                            	   th:value="${orderDto.state}"
-                            	   th:style="'color:' + 
-								              (${orderDto.state} == '결재 대기' ? '#ff0000' : 
-								              (${orderDto.state} == '결재 승인' ? '#0000ff' : 
-								              (${orderDto.state} == '결재 반려' ? '#FF9800' : '#000')))"
-                            	   readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>발주 담당자</label>
-                        </th>
-                        <td>
-                            <input type="text" th:value="${orderDto.mgr}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>발주창고명</label>
-                        </th>
-                        <td>
-                            <input type="text" th:value="${orderDto.wnm}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>납기일</label>
-                        </th>
-                        <td>
-                            <input type="text" class="readonly"
-                            	   th:value="${#dates.format(orderDto.odate, 'yyyy-MM-dd')}" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>발주 특이사항</label>
-                        </th>
-                        <td>
-                            <input type="text" th:value="${orderDto.note}" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>자재명</label>
-                        </th>
-                        <td>
-                            <input type="text" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>품목 특이사항</label>
-                        </th>
-                        <td>
-                            <input type="text" class="readonly" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>수량</label>
-                        </th>
-                        <td>
-                            <input type="text" class="readonly"
-       							   th:value="${orderDto.qty + ' 개'}" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>단가</label>
-                        </th>
-                        <td>
-                            <input type="text" class="readonly"
-       							   th:value="${orderDto.uprc + ' 원'}" readonly>
+        <div id="contents">            
+            <div class="orderForm">
+                <div class="ord_title">
+                    <p>발주서</p>
+                    <div class="ordR">
+                        <p>발주코드 :
+                       		<span th:text="${ogubun}+${ono}"></span>
+                        </p>
+                        <p>발주일자 : 
+                   			<span th:text="${#dates.format(ordate_detail, 'yyyy년 MM월 dd일')}"></span>
+                        </p>
+                    </div>
+                </div>
+                <div class="ord_top">
+					<div class="ord_tcon">
+                        <p>수신처</p>
+                        <table class="table3">
+                            <tr>
+                                <th>담당자명</th>
+                                <td th:text="${receiver['ENAME']}"></td>
+                            </tr>
+                            <tr>
+                                <th>담당부서</th>
+                                <td th:text="${receiver['DNAME']}"></td>
+                            </tr>
+                            <tr>
+                                <th>연락처</th>
+                                <td th:text="${receiver['EPHONE']}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="ord_tcon">
+                        <p>공급처</p>
+                        <table class="table3">
+                            <tr>
+                                <th>공급처명</th>
+                               	<td th:text="${supplier['CNAME']}"></td>
+                            </tr>
+                            <tr>
+                                <th>대표자</th>
+                                <td th:text="${supplier['COWNER']}"></td>
+                            </tr>
+                            <tr>
+                                <th>연락처</th>
+                                <td th:text="${supplier['CPHONE']}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
 
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            <label>총 금액</label>
-                        </th>
-                        <td>
-                            <input type="text" class="readonly"
-       							   th:value="${orderDto.tprc + ' 원'}" readonly>
-                        </td>
-                    </tr>
+                <div class="ord_content">
+                    <form>
+                    	<input type="hidden" name="ogubun" th:value="${ogubun}" />
                     
-                </table>
+                    	<table class="table1">
+	                        <thead>
+	                            <tr>
+	                                <th>NO.</th>
+	                                <th>자재명</th>
+	                                <th>발주납기일</th>
+	                                <th>단위</th>
+	                                <th>단가</th>
+	                                <th>수량</th>
+	                                <th>공급가액</th>
+	                                <th>세액</th>
+	                                <th>총 금액</th>
+	                            </tr>
+	                        </thead>
+	                        <tbody>
+								<tr th:each="i : ${#numbers.sequence(0, 9)}">
+								    <td th:text="${i + 1}"></td>
+								
+								    <!-- 자재명 -->
+								    <td th:if="${i < ordDetail.size()}" th:text="${ordDetail.get(i)['INAME']}"></td>
+								    <td th:unless="${i < ordDetail.size()}"></td>
+								
+								    <!-- 발주납기일 -->
+								    <td th:if="${i < ordDetail.size()}" th:text="${#dates.format(ordDetail.get(i)['ODATE'], 'yyyy-MM-dd')}"></td>
+								    <td th:unless="${i < ordDetail.size()}"></td>
+								
+								    <!-- 단위 -->
+								    <td th:if="${i < ordDetail.size()}" th:text="${ordDetail.get(i)['IUNIT']}"></td>
+								    <td th:unless="${i < ordDetail.size()}"></td>
+								
+								    <!-- 단가 -->
+								    <td class="comma price" th:if="${i < ordDetail.size()}" th:text="${ordDetail.get(i)['IUPRC']}"></td>
+								    <td th:unless="${i < ordDetail.size()}"></td>
+								
+								    <!-- 수량 -->
+								    <td class="comma quantity" th:if="${i < ordDetail.size()}" th:text="${ordDetail.get(i)['OQTY']}"></td>
+								    <td th:unless="${i < ordDetail.size()}"></td>
+								
+								    <!-- 공급가액 -->
+								    <td class="comma price" th:if="${i < ordDetail.size()}" th:text="${ordDetail.get(i)['OSUPRC']}"></td>
+								    <td th:unless="${i < ordDetail.size()}"></td>
+								
+								    <!-- 세액 -->
+								    <td class="comma price" th:if="${i < ordDetail.size()}" th:text="${ordDetail.get(i)['OTAX']}"></td>
+								    <td th:unless="${i < ordDetail.size()}"></td>
+								    
+								    <!-- 총 금액 -->
+								    <td class="comma price" th:if="${i < ordDetail.size()}" th:text="${ordDetail.get(i)['OTPRC']}"></td>
+								    <td th:unless="${i < ordDetail.size()}"></td>
+								</tr>
+	
+	
+	                            <tr class="table_total">
+	                                <td colspan="5">합계</td>
+									<td class="comma quantity" th:text="${summary.oaqty}">0</td>
+    								<td class="comma price" th:text="${summary.oasuprc}">0</td>
+								    <td class="comma price" th:text="${summary.oatax}">0</td>
+								    <td class="comma price" th:text="${summary.oatprc}">0</td>
+	                            </tr>
+	                        </tbody>
+	                    </table>
+                    </form>
+                </div>
+                <div class="ord_ucon">
+                    <table class="table3">
+                        <tr>
+                            <th>특이사항</th>
+                            <td style="height: 150px;"
+                            	th:text="${onote}"></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
             <div class="under_btn_wrap flex_center">
-                <button type="button" class="blue_btn"
-                	    th:if="${orderDto.state == '결재 대기'}">결재</button>
-                <button type="button" onclick="goToList()" class="blue_border_btn">목록</button>
+                <button type="button" class="openModalBtn blue_btn"
+                		th:if="${ostate_detail  == '결재 대기'}">결재</button>
+                <button type="button"
+    					th:if="${view == 'pending'}"
+    					th:onclick="|location.href='@{/confirm/pending(
+							        indexpage=${indexpage},
+							        ogubun=${ogubun},
+							        ordate=${ordate},
+							        ostate=${ostate},
+							        supnm=${supnm},
+							        mgrnm=${mgrnm},
+							        word=${word})}'|"
+			    		class="blue_border_btn">
+			    		목록
+				</button>
+
+				<button type="button"
+    					th:if="${view == 'history'}"
+    					th:onclick="|location.href='@{/confirm/history(
+							        indexpage=${indexpage},
+							        ogubun=${ogubun},
+							        ordate=${ordate},
+							        ostate=${ostate},
+							        supnm=${supnm},
+							        mgrnm=${mgrnm},
+							        word=${word})}'|"
+    					class="blue_border_btn">
+    					목록
+				</button>
+				
+				<button type="button"
+    					th:if="${view == 'my'}"
+    					th:onclick="|location.href='@{/confirm/my(
+							        indexpage=${indexpage},
+							        ogubun=${ogubun},
+							        ordate=${ordate},
+							        ostate=${ostate},
+							        supnm=${supnm},
+							        mgrnm=${mgrnm},
+							        word=${word})}'|"
+						class="blue_border_btn">
+    					목록
+				</button>
+
+				<button type="button"
+    					th:if="${view == 'all'}"
+    					th:onclick="|location.href='@{/confirm(
+							        indexpage=${indexpage},
+							        ogubun=${ogubun},
+							        ordate=${ordate},
+							        ostate=${ostate},
+							        supnm=${supnm},
+							        mgrnm=${mgrnm},
+							        word=${word})}'|"
+						class="blue_border_btn">
+    					목록
+				</button>
             </div>
         </div>
         <!-- 컨텐츠 영역 끝 -->
     </section>
     <!-- section 컨텐츠 영역 끝 -->
+    
+    <!-- modal 시작 -->
+	<div th:replace="fragments/confirmModal"></div>
+    <!-- modal 끝 -->
 
+	<script>
+		$(function() {
+			// 모달 토글
+		  	$('.openModalBtn').on('click', () => {
+		    	$('#confirm_modal').removeClass('hidden');
+		  	});
+		  	$('#closeModalBtn, #cancelModalBtn').on('click', () => {
+		    	$('#confirm_modal').addClass('hidden');
+		  	});
+		  
+		 	// 콤마 포맷팅 함수
+		  	function numberWithCommas(x) {
+		    	if (!x) return '0';
+		    	return Number(x.replace(/,/g, '')).toLocaleString();
+		  	}
+		
+			// 수량에 “개” 붙이기
+			$('.quantity').each(function() {
+				const rawQty = $(this).text().trim();
+   				$(this).text(rawQty + '개');
+ 			});
+
+			// 금액에 콤마 찍고 “원” 붙이기
+			$('.price').each(function() {
+				const rawPrice = $(this).text().trim().replace(/,/g, '');
+				const formatted = numberWithCommas(rawPrice);
+				$(this).text(formatted + '원');
+			});
+		
+		});
+	</script>
 
 </body>
 </html>

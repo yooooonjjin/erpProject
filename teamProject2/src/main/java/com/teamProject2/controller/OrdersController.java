@@ -17,6 +17,8 @@ import com.teamProject2.entity.ClientDto;
 import com.teamProject2.entity.OrdersDto;
 import com.teamProject2.service.OrdersService;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
 @RequestMapping("/order")
 public class OrdersController {
@@ -36,9 +38,10 @@ public class OrdersController {
 	                         @RequestParam(required = false) String supcd,
 	                         @RequestParam(required = false) String omgr,
 	                         @RequestParam(required = false) String onote,
-	                         @RequestParam(defaultValue = "ORD") String ogubun) {
+	                         @RequestParam(defaultValue = "ORD") String ogubun,
+	                         HttpSession session) {
 
-	    ModelAndView model = new ModelAndView();
+		ModelAndView model = new ModelAndView();
 
 	    Page<OrdersDto> page;
 
@@ -81,8 +84,11 @@ public class OrdersController {
 	    model.addObject("supcd", supcd);
 	    model.addObject("omgr", omgr);
 	    model.addObject("onote", onote);
+	    
+	    // 로그인 정보
+     	model.addObject("loginEname",  session.getAttribute("LOGIN_ENAME"));
 
-	    model.setViewName("/order/orderList");
+	    model.setViewName("order/orderList");
 	    return model;
 	}
 
@@ -91,8 +97,16 @@ public class OrdersController {
 	 * 발주신청서화면
 	 */
 	@GetMapping("/write")
-	public ModelAndView write() {
+	public ModelAndView write(HttpSession session) {
+		
 		ModelAndView model = new ModelAndView();
+		
+		// 로그인 정보
+     	model.addObject("loginEname",  session.getAttribute("LOGIN_ENAME"));
+	    model.addObject("loginEcode",  session.getAttribute("LOGIN_ECODE"));
+	    model.addObject("loginDptcd",  session.getAttribute("LOGIN_DPTCD"));
+	    model.addObject("loginDname",  session.getAttribute("LOGIN_DNAME"));
+	    model.addObject("loginEphone",  session.getAttribute("LOGIN_EPHONE"));
 		
 		// 신청서 현재날짜 표시
 		Calendar cal = Calendar.getInstance();
@@ -101,13 +115,15 @@ public class OrdersController {
 		int d = cal.get(Calendar.DATE);
 		model.addObject("ymd",y+"년 "+m+"월 "+d+"일");
 		
-		model.setViewName("/order/orderWrite");
+		model.setViewName("order/orderWrite");
 		
 		return model;
 		
 	}
 	
-	//공급처관련 자동완성
+	/**
+	 * 공급처관련 자동완성
+	 */
 	@GetMapping("/suppliers")
     public List<ClientDto> getSuppliers(@RequestParam("keyword") String keyword) {
         return orderService.findSuppliersByName(keyword);
@@ -118,7 +134,9 @@ public class OrdersController {
         return orderService.findSupplierByCcode(ccode);
     }
     
-    // 자재관련 자동완성
+    /**
+     * 자재관련 자동완성
+     */
     @GetMapping("/items")
     public List<Map<String, Object>> getItems(@RequestParam("keyword") String keyword) {
         return orderService.findItemsByKeyword(keyword.trim());
@@ -164,13 +182,23 @@ public class OrdersController {
     }
 
     
-    // 발주 상세화면
+    /**
+     * 발주 상세화면
+     */
     @GetMapping("/detail")
-    public ModelAndView detail(@RequestParam int ono,@RequestParam String ostate,@RequestParam String ogubun) {
+    public ModelAndView detail(@RequestParam int ono,
+    						   @RequestParam String ostate,
+    						   @RequestParam String ogubun,
+    						   HttpSession session) {
     	
     	
     	ModelAndView model = new ModelAndView();
     	
+    	// 로그인 정보
+     	model.addObject("loginEname",  session.getAttribute("LOGIN_ENAME"));
+	    model.addObject("loginEcode",  session.getAttribute("LOGIN_ECODE"));
+	    
+
     	List<OrdersDto> list = orderService.detail(ono,ogubun);
     	model.addObject("orderList", list);
     	model.addObject("ostate", ostate);
@@ -203,24 +231,21 @@ public class OrdersController {
             model.addObject("omgr", first.getOmgr());
             model.addObject("empcd", first.getEmpcd());
         }
-    	
-    	System.out.println("list:::"+orderList);
-    	model.setViewName("/order/orderDetail");
+
+    	model.setViewName("order/orderDetail");
     	
     	return model;
     	
     	
     }
     
-    // delst n처리 삭제처리
+    /**
+     * delst n처리 삭제처리
+     */
     @PostMapping("/delete")
     public String delete(OrdersDto dto) {
     	
     	String msg = "1";
-    	System.out.println("dto::"+dto.getOstate());
-    	System.out.println("dto::"+dto.getOno());
-    	System.out.println("dto::"+dto.getOgubun());
-    	
     	
     	int result = orderService.updateDelst(dto.getOno(), dto.getOgubun());
     	
@@ -231,14 +256,21 @@ public class OrdersController {
     }
 
 
-    // 발주 수정처리 화면
+    /**
+     * 발주 수정처리 화면
+     */
     @GetMapping("/modify")
-    public ModelAndView modify(@RequestParam int ono,@RequestParam String ogubun) {
+    public ModelAndView modify(@RequestParam int ono,
+    						   @RequestParam String ogubun,
+    						   HttpSession session) {
     	
     	//날짜수정처리 dto.setOudate(new Timestamp(System.currentTimeMillis()));
 
     	
     	ModelAndView model = new ModelAndView();
+    	
+    	// 로그인 정보
+     	model.addObject("loginEname",  session.getAttribute("LOGIN_ENAME"));
     	
     	List<OrdersDto> list = orderService.detail(ono,ogubun);
     	model.addObject("orderList", list);
@@ -276,6 +308,73 @@ public class OrdersController {
     	return model;
     	
     }
+    
+    /**
+     * 로그인 한 사람의 발주목록화면
+     */
+     @GetMapping("/my")
+     public ModelAndView myList(@RequestParam(defaultValue = "1") int indexpage,
+                                @RequestParam(required = false) String ordate,
+                                @RequestParam(required = false) String ostate,
+                                @RequestParam(required = false) String supcd,
+                                @RequestParam(required = false) String onote,
+                                @RequestParam(defaultValue = "ORD") String ogubun,
+                                HttpSession session) {
+
+    	 ModelAndView model = new ModelAndView();
+    	 
+    	 int empcd = (int) session.getAttribute("LOGIN_ECODE");
+    	 String omgr = (String) session.getAttribute("LOGIN_ENAME");
+    	 String empcdStr = String.valueOf(empcd); 
+    	 
+    	 Page<OrdersDto> page;
+
+    	 if ((ordate != null && !ordate.isBlank()) ||
+    			 (ostate != null && !ostate.isBlank()) ||
+    			 (supcd != null && !supcd.isBlank()) ||
+    			 (onote != null && !onote.isBlank())) {
+
+    		 	page = orderService.searchOrdersByLoginEmp(indexpage - 1, 10, ordate, ostate, supcd, onote, ogubun, empcdStr, omgr);
+
+           } else {
+               	page = orderService.listByOgubunAndLoginEmp(indexpage - 1, 10, ogubun, empcdStr, omgr);
+           }
+
+    	 int startPageRownum = (int)(page.getTotalElements() - page.getNumber() * 10);
+
+    	 model.addObject("ordList", page.getContent());
+    	 model.addObject("currentPage", page.getNumber()); // 0-based
+    	 model.addObject("ptotal", page.getTotalElements());
+
+    	 int totalPages = page.getTotalPages();	
+    	 if (totalPages == 0) totalPages = 1;
+    	 model.addObject("ptotalPage", totalPages);
+    	 model.addObject("startPageRownum", startPageRownum);
+
+    	 // 페이지 단위
+    	 int pageGroupSize = 10; // 한 번에 보여줄 페이지 수
+    	 int startPage = (page.getNumber() / pageGroupSize) * pageGroupSize + 1;
+    	 int endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
+    	 model.addObject("startPage", startPage);
+    	 model.addObject("endPage", endPage);
+
+    	 model.addObject("orderCountMap", orderService.countByOnoGroup(ogubun));
+
+    	 List<Integer> onoList = page.getContent().stream().map(OrdersDto::getOno).toList();
+    	 model.addObject("supplierNameMap", orderService.getSupplierNamesForOrders(onoList));
+
+    	 model.addObject("ordate", ordate);
+    	 model.addObject("ostate", ostate);
+    	 model.addObject("supcd", supcd);
+    	 model.addObject("omgr", omgr);
+    	 model.addObject("onote", onote);
+    	 
+    	// 로그인 정보
+      	model.addObject("loginEname",  session.getAttribute("LOGIN_ENAME"));
+
+    	 model.setViewName("/order/orderMyList");
+    	 return model;
+	}
 
 
 }

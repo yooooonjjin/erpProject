@@ -1,65 +1,153 @@
-<div id="confirm_modal" class="modal_container hidden">
-	<div id="modal_con" class="modal_con2 center">
-	    <div class="modal_header">
-	    	<h2>입고 신청서</h2>
-	    	<button type="button" id="closeModalBtn">
-	    		<img src="images/modalClose_btn.svg" alt="모달 닫기 버튼">
-	    	</button>
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ERP 프로젝트</title>
+	<link rel="stylesheet" href="css/total.css" />
+	<link rel="stylesheet" href="css/jquery-ui.css" />
+	<script src="js/jquery-3.7.1.min.js"></script>
+	<script src="js/jquery-ui.js"></script>
+	<script src="js/main.js"></script>
+</head>
+<script>
+	$(function() {
+		// 결재 유형 선택 시 사유 드롭다운 채우기
+		$('#typeSelect').on('change', function () {
+			const val = $(this).val();					// 선택된 결재 (승인, 반려)
+			const reasonSelect = $('#reasonSelect');	// 결재 사유 select 요소
+			const textarea = $('textarea');				// 상세 사유 입력
+	
+			// 초기화
+			reasonSelect.empty();
+			reasonSelect.append(`<option value="0">결재 사유를 선택하세요.</option>`);
+			textarea.val('').prop('required', false);	// 입력값 초기화 + 필수 여부 초기화
+	
+			// 결재 승인
+			if (val === '1') { 
+				reasonSelect.append(`<option value="정상 검토 후 승인">정상 검토 후 승인</option>`);
+				reasonSelect.append(`<option value="납기일 준수 목적">납기일 준수 목적</option>`);
+				reasonSelect.append(`<option value="재고 보충 필요">재고 보충 필요</option>`);
+				reasonSelect.append(`<option value="고객사 요청">고객사 요청</option>`);
+				reasonSelect.append(`<option value="긴급 발주 필요">긴급 발주 필요</option>`);
+				reasonSelect.append(`<option value="기타">기타(직접 입력)</option>`);
+				
+			// 결재 반려
+			} else if (val === '2') { 
+				reasonSelect.append(`<option value="신청 정보/자료 미비">신청 정보/자료 미비</option>`);
+				reasonSelect.append(`<option value="단가/수량 입력 오류">단가/수량 입력 오류</option>`);
+				reasonSelect.append(`<option value="예산 초과">예산 초과</option>`);
+				reasonSelect.append(`<option value="거래처 정보 오류">거래처 정보 오류</option>`);
+				reasonSelect.append(`<option value="발주 사유 불명확">발주 사유 불명확</option>`);
+				reasonSelect.append(`<option value="결재선 미확인">결재선 미확인</option>`);
+				reasonSelect.append(`<option value="기타">기타(직접 입력)</option>`);
+	
+				// 반려 시 상세 사유 필수
+				textarea.prop('required', true);
+			}
+		});
+		
+		// 신청 버튼 클릭 시
+		$('.approvalBtn').on('click', function () {
+			const typeSelect = $('#typeSelect');
+			const reasonSelect = $('#reasonSelect');
+			const textarea = $('textarea');
+			
+			const type = $('#typeSelect').val();		// 결재 유형
+			const reason = $('#reasonSelect').val();	// 결재 사유
+			const detail = $('textarea').val().trim();	// 상세 사유
+	
+			// 결재 유형 선택 여부
+			if (type === '0') {
+				alert('결재 유형을 선택하세요.');
+				typeSelect.focus();
+				return;
+			}
+	
+			// 결재 사유 선택 여부
+			if (reason === '0') {
+				alert('결재 사유를 선택하세요.');
+				reasonSelect.focus();
+				return;
+			}
+	
+			// 반려인 경우 상세 사유 필수 입력
+			if (type === '2' && detail === '') {
+				alert('반려 사유를 입력해주세요.');
+				textarea.focus();
+				return;
+			}
+			
+			// hidden 필드 채우기
+		    $('input[name="type"]').val(type);
+		    $('input[name="rnote"]').val(reason);
+		    $('input[name="rdetail"]').val(detail);
+	
+		    // form 전송
+		    $('#confirmForm').submit();
+	
+		});
+	});
+</script>
+
+<body>
+	<div id="confirm_modal" class="modal_container hidden">
+		<div id="modal_con" class="modal_con2 center">
+		    <div class="modal_header">
+		    	<h2>결재 신청서</h2>
+		    	<button type="button" id="closeModalBtn">
+		    		<img src="/images/modalClose_btn.svg" alt="모달 닫기 버튼">
+		    	</button>
+		    </div>
+	    <div class="modal_body">
+	    <div class="table_wrap">
+		    <form id="confirmForm" method="post" action="/confirm/confirmAction">
+		    	<input type="hidden" name="ono" th:value="${ono}" /> <!-- 발주번호  -->
+		    	<input type="hidden" name="type" />       			<!-- 결재 유형 (승인 or 반려) -->
+			    <input type="hidden" name="rnote" />      			<!-- 선택 사유 -->
+			    <input type="hidden" name="rdetail" />    			<!-- 상세 사유 -->
+		    	
+		    	<table class="table2" style="width: 100%;">
+		    	<tr>
+		    		<th>
+		    			<label>결재 유형</label>
+		    		</th>
+		    		<td class="select_box">
+					    <select id="typeSelect">
+					    	<option value="0" selected>결재 유형을 선택하세요.</option>
+					    	<option value="1">결재 승인</option>
+					    	<option value="2">결재 반려</option>
+					    </select>
+				    </td>
+		    	</tr>
+			    <tr>
+				    <th>
+				    	<label>결재 사유 선택</label>
+				    </th>
+				    <td class="select_box">
+					    <select id="reasonSelect">
+					    	<option value="0" selected>결재 사유를 선택하세요.</option>
+	
+					    </select>
+				    </td>
+			    </tr>
+			    <tr>
+				    <th>
+				    <label>결재 사유 상세 입력</label>
+				    </th>
+				    <td>
+				    	<textarea placeholder="상세 사유를 입력하세요."></textarea>
+				    </td>
+			    </tr>
+		    </table>
+		    </form>
 	    </div>
-    <div class="modal_body">
-    <div class="table_wrap">
-	    <table class="table2" style="width: 100%;">
-	    	<tr>
-	    		<th>
-	    			<label>결재 유형</label>
-	    		</th>
-	    		<td class="select_box">
-				    <select>
-				    	<option value="0" selected>결재 유형을 선택하세요.</option>
-				    	<option value="1">결재 승인</option>
-				    	<option value="2">결재 반려</option>
-				    </select>
-			    </td>
-	    	</tr>
-		    <tr>
-			    <th>
-			    	<label>결재 사유 선택</label>
-			    </th>
-			    <td class="select_box">
-				    <select>
-				    	<option value="0" selected>결재 사유를 선택하세요.</option>
-				    	<option value="1">정상 검토 후 승인</option>
-				    	<option value="2">납기일 준수 목적</option>
-				    	<option value="3">재고 보충 필요</option>
-				    	<option value="4">고객사 요청</option>
-				    	<option value="5">긴급 발주 필요</option>
-				    	<option value="6">기타(직접 입력)</option>
-				    	
-				    	<option value="1">신청 정보/자료 미비</option>
-				    	<option value="2">단가/수량 입력 오류</option>
-				    	<option value="3">예산 초과</option>
-				    	<option value="4">거래처 정보 오류</option>
-				    	<option value="5">발주 사유 불명확</option>
-				    	<option value="6">결재선 미확인</option>
-				    	<option value="7">기타(직접 입력)</option>
-				    	
-				    </select>
-			    </td>
-		    </tr>
-		    <tr>
-			    <th>
-			    <label>결재 사유 상세 입력</label>
-			    </th>
-			    <td>
-			    	<textarea placeholder="상세 사유를 입력하세요."></textarea>
-			    </td>
-		    </tr>
-	    </table>
-    </div>
-    </div>
-	    <div class="under_btn_wrap flex_center">
-	    	<button type="button" class="blue_btn">신청</button>
-	    	<button type="button" id="cancelModalBtn" class="blue_border_btn">취소</button>
 	    </div>
-    </div>
-</div>
+		    <div class="under_btn_wrap flex_center">
+		    	<button type="button" class="approvalBtn blue_btn">신청</button>
+		    	<button type="button" id="cancelModalBtn" class="blue_border_btn">취소</button>
+		    </div>
+	    </div>
+	</div>
+</body>
+</html>

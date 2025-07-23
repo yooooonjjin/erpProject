@@ -165,3 +165,22 @@ button {
     width: 100%;
     padding: 15px 0;
 }
+
+
+#loginBox .login_container .inputWrap .login_input input.error {
+  border: 2px solid #f00;
+  outline: none;
+}
+
+#loginBox .login_container .inputWrap {
+	position: relative;
+}
+.error_msg {
+	position: absolute;
+    bottom: 1.9em;
+    color: #f00 !important;
+    font-size: 1.4rem !important;
+    font-weight: 500 !important;
+}
+
+

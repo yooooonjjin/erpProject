@@ -19,7 +19,6 @@ public class ReasonService {
 		this.reasonRepository = reasonRepository;
 	}
 
-	
 	// 불용 사유 저장 메서드
 	public void save(ReasonDto reasonDto) {
 	    try {
@@ -29,12 +28,11 @@ public class ReasonService {
 	        throw new RuntimeException("이 데이터는 이미 다른 사용자에 의해 수정되었습니다. 다시 시도해 주세요.");
 	    }
     }
-	
-	// 불용 사유를 ocode로 조회하는 메서드
-		public Optional<ReasonDto> getReasonByOrderCode(int ocode) {
-		    return reasonRepository.findBySticd(ocode);
-		}
 
+	// 불용 사유를 ocode로 조회하는 메서드
+	public Optional<ReasonDto> getReasonByOrderCode(int ocode) {
+	    return reasonRepository.findBySticd(ocode);
+	}
 	
 
 	

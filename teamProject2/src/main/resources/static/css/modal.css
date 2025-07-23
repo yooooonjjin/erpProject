@@ -92,9 +92,19 @@
     width: 100%;
 }
 
+.modal_con2 select:focus, .modal_con2 textarea:focus {
+    outline: none;               /* 브라우저 기본 테두리 제거 */
+    border: 2px solid #007BFF;   /* 파란색 테두리 */
+    box-shadow: 0 0 5px rgba(0,123,255,0.5); /* 살짝 번지는 효과 */
+    transition: all 0.2s ease-in-out;
+}
 
 /* 모달 hidden css 시작 */
 #confirm_modal.hidden {
+    display: none;
+}
+
+#requestOrder_modal.hidden {
     display: none;
 }
 /* 모달 hidden css 끝 */

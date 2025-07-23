@@ -1,34 +1,79 @@
 <div id="aside">
 	<ul>
-		<li class="menu01">
-	    	<a href="#none">발주 관리</a>
-	        <ul class="menu02">
-	        	<li>
-	            	<a href="#none">자재 목록</a>
-				</li>
-	            <li>
-	        		<a href="#none">자재 등록</a>
-	            </li>
-			</ul>
-		</li>
-	
-	    <li class="menu01">
-	        <a href="#none">결재 관리</a>
-	        <ul class="menu02">
-	        	<li>
-	            	<a href="#none">발주 목록</a>
-	            </li>
-	    	</ul>
-	    </li>
+		<!-- 구매팀 aside 시작 -->
+		<li class="menu01" th:if="${session.LOGIN_DCODE == 10001}">
+	      	<a href="#none">발주 관리</a>
+	      	<ul class="menu02">
+		        <li>
+		        	<a href="/order">발주 내역 조회</a>
+		        </li>
+		        <li>
+		        	<a href="/order/write">발주 작성</a>
+		        </li>
+	      	</ul>
+    	</li>
+    	
+    	<li class="menu01" th:if="${session.LOGIN_DCODE == 10001}">
+	      	<a href="#none">내 업무 현황</a>
+	      	<ul class="menu02">
+		        <li>
+		        	<a href="/order/my">발주 건수</a>
+		        </li>
+	      	</ul>
+    	</li>
+		<!-- 구매팀 aside 끝 -->
 	    
-	    <li class="menu01">
-	        <a href="#none">입고 관리</a>
-	        <ul class="menu02">
-	        	<li>
-	            	<a href="#none">입고 목록</a>
-	            </li>
-	    	</ul>
-	    </li>
+	    <!-- 관리팀 aside 시작 -->
+		<li class="menu01" th:if="${session.LOGIN_DCODE == 10002}">
+	      	<a href="#none">결재 관리</a>
+	      	<ul class="menu02">
+		        <li>
+		        	<a href="/confirm">결재 목록</a>
+		        </li>
+		        <li>
+		        	<a href="/confirm/pending">결재 대기함</a>
+		        </li>
+		        <li>
+		        	<a href="/confirm/history">결재 이력</a>
+		        </li>
+	      	</ul>
+    	</li>
+    	
+    	<li class="menu01" th:if="${session.LOGIN_DCODE == 10002}">
+	      	<a href="#none">내 업무 현황</a>
+	      	<ul class="menu02">
+		        <li>
+		        	<a href="/confirm/my">내 결재 이력</a>
+		        </li>
+	      	</ul>
+    	</li>
+		<!-- 관리팀 aside 끝 -->
+		
+		<!-- 자재팀 aside 시작 -->
+		<li class="menu01" th:if="${session.LOGIN_DCODE == 10003}">
+	      	<a href="#none">입고 관리</a>
+	      	<ul class="menu02">
+		        <li>
+		        	<a href="/stokIn">입고 목록</a>
+		        </li>
+		        <li>
+		        	<a href="#none">재고 현황</a>
+		        </li>
+	      	</ul>
+    	</li>
+    	
+    	<li class="menu01" th:if="${session.LOGIN_DCODE == 10003}">
+	      	<a href="#none">내 업무 현황</a>
+	      	<ul class="menu02">
+		        <li>
+		        	<a href="#none">발주 건수</a>
+		        </li>
+		        <li>
+		        	<a href="#none">오늘 마감 예정 건</a>
+		        </li>
+	      	</ul>
+    	</li>
+		<!-- 자재팀 aside 끝 -->
 	                
 	</ul>
 </div>

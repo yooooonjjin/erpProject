@@ -4,21 +4,22 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>ERP 프로젝트</title>
-    <link rel="stylesheet" href="/css/total.css" />
-    <link rel="stylesheet" href="/css/jquery-ui.css" />    
-    <script src="/js/jquery-3.7.1.min.js"></script>
-    <script src="/js/jquery-ui.js"></script>
+	<link rel="stylesheet" href="/css/total.css" />
+	<link rel="stylesheet" href="/css/jquery-ui.css" />	
+	<script src="/js/jquery-3.7.1.min.js"></script>
+  	<script src="/js/main.js"></script>
+  	<script src="/js/jquery-ui.js"></script>
 </head>
-<script>
+<script th:inline="javascript">
 	$(function(){
 	    $("#datepicker").datepicker({
 	    	dateFormat: "yy-mm-dd"
 		});
-	});   
-	
+	});
+
 	window.onload = function() {
 		if(performance.navigation.type === 1) { // 1은 새로고침(F5)
-	    	window.location.href = '/confirm'; // 쿼리 파라미터 없이 새로 이동
+	    	window.location.href = '/confirm/history'; // 쿼리 파라미터 없이 새로 이동
 	  	}
 	};
 </script>
@@ -41,7 +42,7 @@
                 <h2>발주 결재 목록</h2>
             </div>
             <div class="con_top_wrap">
-                <form th:action="@{/confirm}"
+                <form th:action="@{/confirm/history}"
                 	  method="get"
                 	  id="searchForm"
                 	  class="search_wrap"
@@ -62,9 +63,9 @@
 						    		th:selected="${ostate == null or ostate == ''}">발주 상태 (전체)</option>
 						    <!-- DB에서 가져온 상태값 순회 -->
 						    <option th:each="state : ${statusList}"
-							        th:value="${state}"
-							        th:text="${state}"
-							        th:selected="${state == ostate}">
+          							th:value="${state}"
+          							th:text="${state}"
+          							th:selected="${state == ostate}">
 							</option>
   						</select>
                     </div>
@@ -115,15 +116,16 @@
                         	<td th:text="${startPageRownum - myState.index}"></td>
                         	<td th:text="${list.ogubun}+${list.ono}"></td>     
                         	<td>
-                        		<a th:href="@{/confirm/{ono}( ono=${list.ono},
-														      ogubun=${ogubun},
-														      indexpage=${currentPage},
-														      ordate=${ordate},
-														      ostate=${ostate},
-														      supnm=${supnm},
-														      mgrnm=${mgrnm},
-														      word=${word}
-														    )}"
+                        		<a th:href="@{/confirm/history/{ono}(
+                        					 ono=${list.ono},
+											 ogubun=${ogubun},
+											 indexpage=${currentPage},
+											 ordate=${ordate},
+											 ostate=${ostate},
+											 supnm=${supnm},
+											 mgrnm=${mgrnm},
+											 word=${word},
+											 view='history')}"
                         		   th:text="${list.ostate}"
 								   th:class="'state ' +
 	                        		   (${list.ostate} == '결재 대기' ? 'statusWaiting' :
@@ -149,7 +151,7 @@
 			<!-- 맨 처음 버튼 -->
 			<a th:classappend="${currentPage == 1} ? ' disabled' : ''"
   			   th:attr="href=${currentPage > 1} 
-    					? @{/confirm(
+    					? @{/confirm/history(
   						indexpage=1,
   						ordate=${ordate},
   						ostate=${ostate},
@@ -158,13 +160,13 @@
   						word=${word}
 					)} 
     				: 'javascript:void(0)'">
-  				<img src="images/page_first.svg" alt="처음 버튼"/>
+  				<img src="/images/page_first.svg" alt="처음 버튼"/>
 			</a>
 
   			<!-- 이전 버튼 -->
 			<a th:classappend="${currentPage == 1} ? ' disabled' : ''"
 			   th:attr="href=${currentPage > 1} 
-			    		? @{/confirm(
+			    		? @{/confirm/history(
 			         	indexpage=${currentPage-1},
 			         	ordate=${ordate},
 			         	ostate=${ostate},
@@ -173,12 +175,12 @@
 			         	word=${word}
 			       	)} 
 			    	: 'javascript:void(0)'">
-				<img src="images/page_prev.svg" alt="이전 버튼"/>
+				<img src="/images/page_prev.svg" alt="이전 버튼"/>
 			</a>
 			<!-- 페이지 번호 -->
 			<div class="div_page flex_center">
 				<span th:each="n : ${#numbers.sequence(1, ptotalPage == 0 ? 1 : ptotalPage)}">
-			    	<a th:href="@{/confirm(
+			    	<a th:href="@{/confirm/history(
 			        			indexpage=${n},
 			                   	ordate=${ordate},
 			                   	ostate=${ostate},
@@ -195,7 +197,7 @@
 			<!-- 다음 버튼 -->
 			<a th:classappend="${currentPage < ptotalPage} ? '' : ' disabled'"
   			   th:href="${currentPage < ptotalPage} 
-						? @{/confirm(
+						? @{/confirm/history(
                    		indexpage=${currentPage + 1},
                    		ordate=${ordate},
                    		ostate=${ostate},
@@ -204,13 +206,13 @@
                    		word=${word}
                  	)} 
              		: 'javascript:void(0)'">
-				<img src="images/page_next.svg" alt="다음 버튼"/>
+				<img src="/images/page_next.svg" alt="다음 버튼"/>
 			</a>
 			
 			<!-- 맨 뒤 버튼 -->
 			<a th:classappend="${currentPage < ptotalPage} ? '' : ' disabled'"
  			   th:href="${currentPage < ptotalPage} 
-             			? @{/confirm(
+             			? @{/confirm/history(
                    		indexpage=${ptotalPage},
                    		ordate=${ordate},
                    		ostate=${ostate},
@@ -219,7 +221,7 @@
                    		word=${word}
                  	)} 
              		: 'javascript:void(0)'">
-				<img src="images/page_last.svg" alt="맨끝 버튼"/>
+				<img src="/images/page_last.svg" alt="맨끝 버튼"/>
 			</a>
 		</div>
 		<!-- 페이지 끝 -->

@@ -21,7 +21,7 @@ public class DeptDto {
 	    @Column
 	    private int dcode;
 
-	    @Column(length = 20)
+	    @Column(length = 10)
 	    private String dname;
 
 }

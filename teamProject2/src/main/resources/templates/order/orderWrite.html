@@ -1,333 +1,25 @@
 <!DOCTYPE html>
 <html lang="ko"  xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ERP 프로젝트</title>
-  <link rel="stylesheet" href="/css/total.css" />
-  <script src="/js/jquery-3.7.1.min.js"></script>
-  <script src="/js/main.js"></script>
-  <!-- jQuery UI CSS -->
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">	
-  <!-- jQuery UI JS -->
-  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-  <script>
-$(function () {
-    
-	$(".datepicker").datepicker({
-        dateFormat: "yy-mm-dd",
-        minDate: 0 // 오늘부터 선택 가능
-    });
-
-});
-</script>
-  <script>
-  $(document).on('keyup', '.itemName', function() {
-	    const $input = $(this);
-	    const keyword = $input.val();
-	    const $list = $input.siblings('.itemList');
-
-	    if(keyword.length >= 1) {
-	        $.ajax({
-	            url: '/order/items',
-	            data: { keyword },
-	            success: function(data) {
-	                $list.empty().show();
-	                data.forEach(item => {
-	                    let typeLabel = '';
-	                    switch (item.igubun) {
-	                        case 'MAT': typeLabel = ' (원재료)'; break;
-	                        case 'PRD': typeLabel = ' (완제품)'; break;
-	                        case 'FAC': typeLabel = ' (설비품)'; break;
-	                        default: typeLabel = '';
-	                    }
-
-	                    $list.append(`
-	                        <li data-icode="${item.icode}" 
-	                            data-iunit="${item.iunit}" 
-	                            data-iuprc="${item.iuprc}" 
-	                            data-igubun="${item.igubun}">
-	                            ${item.iname}${typeLabel}
-	                        </li>
-	                    `);
-	                });
-	            }
-	        });
-	    } else {
-	        $list.hide();
-	    }
-	});
-//수량 변경 시 공급가액·세액 다시 계산
-$(document).on('input', '.iqty', function () {
-    const $row = $(this).closest('tr');
-    recalculateRow($row);
-    updateTotal();
-});
-
-// 자재 선택 시 처리 함수
-function recalculateRow($row) {
-    const qty = parseInt($row.find('.iqty').val()) || 0;
-    const priceStr = $row.find('.iuprc').val().replace(/,/g, '');
-    const price = parseInt(priceStr);
-
-    if (isNaN(price) || qty === 0) {
-        $row.find('.supplyTotal').text('-');
-        $row.find('.tax').text('-');
-        $row.find('.rowTotal').text('-');
-        
-        // 값도 비워주기
-        $row.find('.osuprcInput').val('');
-        $row.find('.otaxInput').val('');
-        $row.find('.otprcInput').val('');
-        return;
-    }
-
-    const supplyTotal = qty * price;
-    const tax = Math.round(supplyTotal * 0.1);
-    const total = supplyTotal + tax;
-
-    // 표시
-    $row.find('.supplyTotal').text(supplyTotal.toLocaleString() + '원');
-    $row.find('.tax').text(tax.toLocaleString() + '원');
-    $row.find('.rowTotal').text(total.toLocaleString() + '원');
-
-    // 값 저장
-    $row.find('.osuprcInput').val(supplyTotal);
-    $row.find('.otaxInput').val(tax); 
-    $row.find('.otprcInput').val(total); 
-    
-    console.log("Hidden input values:");
-    console.log("osuprc:", $row.find('.osuprcInput').val());
-    console.log("otax:", $row.find('.otaxInput').val());
-    console.log("otprc:", $row.find('.otprcInput').val());
-
-}
-
-
-
-
-
-// 하단 합계 자동 계산
-function updateTotal() {
-    let totalQty = 0;
-    let totalSupply = 0;
-    let totalTax = 0;
-    let totalAmount = 0;
-
-    $('tbody tr').not('.table_total').each(function () {
-        const qty = parseInt($(this).find('.iqty').val()) || 0;
-        const priceStr = ($(this).find('.iuprc').val() || '0').replace(/,/g, '');
-        const price = parseInt(priceStr);
-
-        if (isNaN(price) || qty === 0) return;
-
-        const supplyTotal = qty * price;
-        const tax = Math.round(supplyTotal * 0.1);
-        const total = supplyTotal + tax;
-
-        totalQty += qty;
-        totalSupply += supplyTotal;
-        totalTax += tax;
-        totalAmount += total;
-    });
-
-    $('.totalQty').text(totalQty);
-    $('.totalSupply').text(totalSupply.toLocaleString() + '원');
-    $('.totalTax').text(totalTax.toLocaleString() + '원');
-    $('.totalAmount').text(totalAmount.toLocaleString() + '원');  
-    
- 	// 여기서 숨은 input에 값을 넣어주기!
-    $('.hidden-oaqty').val(totalQty);
-    $('.hidden-oasuprc').val(totalSupply);
-    $('.hidden-oatax').val(totalTax);
-    $('.hidden-oatprc').val(totalAmount);
-    
-    
-}
-
-
-
-
-
-
-// 단가 입력 시 콤마 표시 (readonly지만 혹시나 수동 수정 대비)
-$(document).on('blur', '.iuprc', function () {
-    const value = $(this).val().replace(/,/g, '');
-    if (!isNaN(value)) {
-        $(this).val(parseInt(value).toLocaleString());
-    }
-});
-
-// 자재 선택 시 처리
-// 현재 코드 중복 체크 부분 수정 예시
-// 자재 선택 시 처리
-$(document).on('click', '.itemList li', function () {
-    const $li = $(this);
-    const $row = $li.closest('tr');
-    const selectedIcode = String($li.data('icode')).trim();
-    const selectedIgubun = String($li.data('igubun')).trim();
-
-    if (!selectedIcode && !selectedIgubun) {
-        alert('잘못된 자재 코드입니다.');
-        return;
-    }
-
-    let isDuplicate = false;
-
-    $('tbody tr').not('.table_total').not($row).each(function () {
-        const otherIcode = String($(this).find('.icodeHidden').val() || '').trim();
-        const otherIgubun = String($(this).find('.igubunHidden').val() || '').trim();
-
-        if (!otherIcode || !otherIgubun) return;
-
-        if (selectedIcode === otherIcode && selectedIgubun === otherIgubun) {
-            isDuplicate = true;
-            return false; // break
-        }
-    });
-
-    if (isDuplicate) {
-        alert('이미 선택된 자재입니다.');
-        $row.find('.itemName').val('');
-        $row.find('.iunit').val('');
-        $row.find('.iuprc').val('');
-        $row.find('.icodeHidden').val('');
-        $row.find('.igubunHidden').val('');
-        $row.find('.iqty').val(0);
-        $row.find('.supplyTotal').text('-');
-        $row.find('.tax').text('-');
-        $row.find('.rowTotal').text('-');
-        $li.closest('ul').hide();
-        updateTotal();
-        return;
-    }
-
-    const iname = $li.text().trim(); // 앞뒤 공백 제거
-    const iunit = $li.data('iunit');
-    const iuprc = $li.data('iuprc');
-    const igubun = $li.data('igubun');
-
-    $row.find('.itemName').val(iname);
-    $row.find('.iunit').val(iunit);
-    $row.find('.iuprc').val(Number(iuprc).toLocaleString());
-
-
- // input이 존재하지 않으면 만들어주고, 존재하면 덮어쓰기
-    let $icode = $row.find('.icodeHidden');
-    let $igubun = $row.find('.igubunHidden');
-
-    if ($icode.length === 0) {
-      $row.find('td').eq(1).append(`<input type="hidden" class="icodeHidden" name="icode" />`);
-      $icode = $row.find('.icodeHidden');
-    }
-    if ($igubun.length === 0) {
-      $row.find('td').eq(1).append(`<input type="hidden" class="igubunHidden" name="igubun" />`);
-      $igubun = $row.find('.igubunHidden');
-    }
-
-    $icode.val(selectedIcode);
-    $igubun.val(selectedIgubun);
-
-    $li.closest('ul').hide();
-
-    recalculateRow($row);
-    updateTotal();
-});
-
-
-
-
-
-
-
-
-</script>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ERP 프로젝트</title>
+	<link rel="stylesheet" href="/css/total.css" />
+	<link rel="stylesheet" href="/css/jquery-ui.css" />	
+	<script src="/js/jquery-3.7.1.min.js"></script>
+  	<script src="/js/main.js"></script>
+  	<script src="/js/jquery-ui.js"></script>
 </head>
-
-<!-- 공급처 자동완성 기능 -->
-<script>
-$(document).ready(function () {
-    $('#supplierName').on('keyup', function () {
-        const keyword = $(this).val();
-        if (keyword.length >= 1) {
-            $.ajax({
-                url: '/order/suppliers',
-                data: { keyword },
-                success: function (data) {
-                    const list = $('#supplierList');
-                    list.empty().show();
-                    data.forEach(supplier => {
-                        $('#supplierList').append(`
-                            <li data-ccode="${supplier.ccode}">
-                                ${supplier.cname}
-                            </li>
-                        `);
-                    });
-
-                }
-            });
-        } else {
-            $('#supplierList').hide();
-        }
-    });
-
-    $(document).on('click', '#supplierList li', function () {
-        const cname = $(this).text().trim();                // 공급처명
-        const ccode = $(this).data('ccode');         // 공급처코드
-
-        $('#supplierName').val(cname);               // 사용자 입력창에 표시
-        $('#supplierCode').val(ccode);               // 숨은 input에 값 설정
-        $('#supplierList').hide();
-
-        // 추가 정보 조회
-        $.ajax({
-            url: `/order/supplier/${ccode}`,
-            success: function (data) {
-                $('#supplierOwner').val(data.cowner);
-                $('#supplierPhone').val(data.cphone);
-            }
-        });
-    });
-
-
-    // 클릭 외부 감지하여 자동완성 숨기기
-    $(document).click(function (e) {
-        if (!$(e.target).closest('#supplierName').length) {
-            $('#supplierList').hide();
-        }
-    });
-});
-
-
-
-</script>
-
-<!-- 자재 자동완성 기능 -->
-
 <body>
 
-    <!-- skip 네비게이션 영역 -->
-    <nav id="skipToContent">
-        <ul>
-            <li><a href="#container">Skip to Main Content</a></li>
-            <li><a href="#gnb">Skip to Main Menu</a></li>
-            <li><a href="#header">Skip to Upeer Menu</a></li>
-            <li><a href="#footers">Skip to Lower Menu</a></li>
-        </ul>
-    </nav>
-    <!-- skip 네비게이션 영역 -->
-
     <!-- header 헤더 시작 -->
-    <header th:insert="~{fragments/header}">
-    </header>
+    <header th:insert="~{fragments/header}"></header>
     <!-- header 헤더 끝 -->
 
-    <!-- section 컨텐츠 영역 시작 -->
+	<!-- section 컨텐츠 영역 시작 -->
     <section id="section">
         <!-- 죄측 메뉴바 시작 -->
-        <aside th:insert="~{fragments/aside}" id="aside">
-           
-        </aside>
+		<aside th:insert="~{fragments/aside}"></aside>
         <!-- 죄측 메뉴바 끝 -->
 
         <!-- 컨텐츠 영역 시작 -->
@@ -348,18 +40,18 @@ $(document).ready(function () {
                         <p>수신처</p>
                         <table class="table3">
                             <tr>
-                            	<input type="hidden" name="omgr" th:value="${session.loginEmp.ename}" readonly>
-                            	<input type="hidden" name="empcd" th:value="${session.loginEmp.ecode}" readonly>
+                            	<input type="hidden" name="omgr" th:value="${loginEname}" readonly>
+                            	<input type="hidden" name="empcd" th:value="${loginEcode}" readonly>
                                 <th>담당자명</th>
-                                <td th:text="${loginEmp.ename}"></td>
+                                <td th:text="${loginEname}"></td>
                             </tr>
                             <tr>
                                 <th>담당부서</th>
-                                <td th:text="${dept.dname}"></td>
+                                <td th:text="${loginDname}"></td>
                             </tr>
                             <tr>
                                 <th>연락처</th>
-                                <td th:text="${loginEmp.ephone}"></td>
+                                <td th:text="${loginEphone}"></td>
                             </tr>
                         </table>
                     </div>
@@ -368,7 +60,7 @@ $(document).ready(function () {
                         <table class="table3">
                             <tr>
                             	<th>공급처명</th>
-                                <td>
+                                <td class="autocompleteInput">
 								  <!-- 사용자에게 보여지는 입력창: 공급처명 -->
 								  <input type="text" id="supplierName" autocomplete="off" placeholder="공급처명을 입력하세요." />
 								
@@ -419,11 +111,14 @@ $(document).ready(function () {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="i : ${#numbers.sequence(1, 10)}">
+                            <tr th:each="i : ${#numbers.sequence(1, 10)}"
+                                th:class="'autocompleteInput' + ${i}">
 							    <td th:text="${i}">1</td>
 							    <td>
-							      <input type="text" class="itemName" name="itemName" autocomplete="off" placeholder="자재명 입력" />
-							      <ul class="itemList autocomplete-list"></ul>
+							      <div class="autocompleteInput">
+							      	<input type="text" class="itemName" name="itemName" autocomplete="off" placeholder="자재명 입력" />
+								  	<ul class="itemList autocomplete-list"></ul>
+								  </div>
 							    </td>
 							    <td><input type="text" class="dateS datepicker" name="odate" placeholder="YYYY-MM-DD"></td>
 							    <td><input type="text" class="iunit" readonly /></td>
@@ -483,89 +178,267 @@ $(document).ready(function () {
     <!-- section 컨텐츠 영역 끝 -->
 
 
-
-
+<!-- 기존 <script> 위치에 이 부분만 복붙 -->
 <script>
+$(function () {
+    $(".datepicker").datepicker({
+        dateFormat: "yy-mm-dd",
+        minDate: 0
+    });
 
-$(document).ready(function () {
-	
-	$("button[type='reset']").on("click", function () {
-		   
-		
-	    setTimeout(() => {
-	        // 각 행 초기화
-	        $("tbody tr").not(".table_total").each(function () {
-	            const $row = $(this);
-	            $row.find(".iqty").val(0);
-	            $row.find(".supplyTotal").text("-");
-	            $row.find(".tax").text("-");
-	            $row.find(".rowTotal").text("-");
+    $(document).on('keyup', '.itemName', function () {
+        const $input = $(this);
+        const keyword = $input.val();
+        const $list = $input.siblings('.itemList');
 
-	            $row.find(".osuprcInput").val('');
-	            $row.find(".otaxInput").val('');
-	            $row.find(".otprcInput").val('');
-	        });
+        if (keyword.length >= 1) {
+            $.ajax({
+                url: '/order/items',
+                data: { keyword },
+                success: function (data) {
+                    $list.empty().show();
+                    data.forEach(item => {
+                        let typeLabel = '';
+                        switch (item.igubun) {
+                            case 'MAT': typeLabel = ' (원재료)'; break;
+                            case 'PRD': typeLabel = ' (완제품)'; break;
+                            case 'FAC': typeLabel = ' (설비품)'; break;
+                        }
+                        $list.append(`
+                            <li data-icode="${item.icode}" 
+                                data-iunit="${item.iunit}" 
+                                data-iuprc="${item.iuprc}" 
+                                data-igubun="${item.igubun}">
+                                ${item.iname}${typeLabel}
+                            </li>
+                        `);
+                    });
+                }
+            });
+        } else {
+            $list.hide();
+        }
+    });
 
-	        // 합계 행 초기화
-	        $(".totalQty").text("0");
-	        $(".totalSupply").text("0원");
-	        $(".totalTax").text("0원");
-	        $(".totalAmount").text("0원");
+    $(document).on('click', '.itemList li', function () {
+        const $li = $(this);
+        const $row = $li.closest('tr');
+        const selectedIcode = String($li.data('icode')).trim();
+        const selectedIgubun = String($li.data('igubun')).trim();
 
-	        $(".hidden-oaqty").val('');
-	        $(".hidden-oasuprc").val('');
-	        $(".hidden-oatax").val('');
-	        $(".hidden-oatprc").val('');
-	    }, 10); // 약간의 지연으로 reset 후 실행되도록 함
-	});
+        let isDuplicate = false;
+        $('tbody tr').not('.table_total').not($row).each(function () {
+            const otherIcode = String($(this).find('.icodeHidden').val() || '').trim();
+            const otherIgubun = String($(this).find('.igubunHidden').val() || '').trim();
+            if (selectedIcode === otherIcode && selectedIgubun === otherIgubun) {
+                isDuplicate = true;
+                return false;
+            }
+        });
 
-	
+        if (isDuplicate) {
+            alert('이미 선택된 자재입니다.');
+            $row.find('.itemName, .iunit, .iuprc, .icodeHidden, .igubunHidden').val('');
+            $row.find('.iqty').val(0);
+            $row.find('.supplyTotal, .tax, .rowTotal').text('-');
+            $li.closest('ul').hide();
+            updateTotal();
+            return;
+        }
+
+        const iname = $li.text().trim();
+        const iunit = $li.data('iunit');
+        const iuprc = $li.data('iuprc');
+
+        $row.find('.itemName').val(iname);
+        $row.find('.iunit').val(iunit);
+        $row.find('.iuprc').val(Number(iuprc).toLocaleString());
+
+        let $icode = $row.find('.icodeHidden');
+        let $igubun = $row.find('.igubunHidden');
+
+        if ($icode.length === 0) {
+            $row.find('td').eq(1).append(`<input type="hidden" class="icodeHidden" name="icode" />`);
+            $icode = $row.find('.icodeHidden');
+        }
+        if ($igubun.length === 0) {
+            $row.find('td').eq(1).append(`<input type="hidden" class="igubunHidden" name="igubun" />`);
+            $igubun = $row.find('.igubunHidden');
+        }
+
+        $icode.val(selectedIcode);
+        $igubun.val(selectedIgubun);
+
+        $li.closest('ul').hide();
+        recalculateRow($row);
+        updateTotal();
+    });
+
+    $(document).on('input', '.iqty', function () {
+        const $row = $(this).closest('tr');
+        recalculateRow($row);
+        updateTotal();
+    });
+
+    $(document).on('blur', '.iuprc', function () {
+        const value = $(this).val().replace(/,/g, '');
+        if (!isNaN(value)) {
+            $(this).val(parseInt(value).toLocaleString());
+        }
+    });
+
+    function recalculateRow($row) {
+        const qty = parseInt($row.find('.iqty').val()) || 0;
+        const priceStr = $row.find('.iuprc').val().replace(/,/g, '');
+        const price = parseInt(priceStr);
+
+        if (isNaN(price) || qty === 0) {
+            $row.find('.supplyTotal, .tax, .rowTotal').text('-');
+            $row.find('.osuprcInput, .otaxInput, .otprcInput').val('');
+            return;
+        }
+
+        const supplyTotal = qty * price;
+        const tax = Math.round(supplyTotal * 0.1);
+        const total = supplyTotal + tax;
+
+        $row.find('.supplyTotal').text(supplyTotal.toLocaleString() + '원');
+        $row.find('.tax').text(tax.toLocaleString() + '원');
+        $row.find('.rowTotal').text(total.toLocaleString() + '원');
+
+        $row.find('.osuprcInput').val(supplyTotal);
+        $row.find('.otaxInput').val(tax);
+        $row.find('.otprcInput').val(total);
+    }
+
+    function updateTotal() {
+        let totalQty = 0, totalSupply = 0, totalTax = 0, totalAmount = 0;
+
+        $('tbody tr').not('.table_total').each(function () {
+            const qty = parseInt($(this).find('.iqty').val()) || 0;
+            const price = parseInt(($(this).find('.iuprc').val() || '0').replace(/,/g, '')) || 0;
+
+            const supply = qty * price;
+            const tax = Math.round(supply * 0.1);
+            const total = supply + tax;
+
+            totalQty += qty;
+            totalSupply += supply;
+            totalTax += tax;
+            totalAmount += total;
+        });
+
+        $('.totalQty').text(totalQty);
+        $('.totalSupply').text(totalSupply.toLocaleString() + '원');
+        $('.totalTax').text(totalTax.toLocaleString() + '원');
+        $('.totalAmount').text(totalAmount.toLocaleString() + '원');
+
+        $('.hidden-oaqty').val(totalQty);
+        $('.hidden-oasuprc').val(totalSupply);
+        $('.hidden-oatax').val(totalTax);
+        $('.hidden-oatprc').val(totalAmount);
+    }
+
+    $('#supplierName').on('keyup', function () {
+        const keyword = $(this).val();
+        if (keyword.length >= 1) {
+            $.ajax({
+                url: '/order/suppliers',
+                data: { keyword },
+                success: function (data) {
+                    const list = $('#supplierList');
+                    list.empty().show();
+                    data.forEach(supplier => {
+                        $('#supplierList').append(`
+                            <li data-ccode="${supplier.ccode}">
+                                ${supplier.cname}
+                            </li>
+                        `);
+                    });
+                }
+            });
+        } else {
+            $('#supplierList').hide();
+        }
+    });
+
+    $(document).on('click', '#supplierList li', function () {
+        const cname = $(this).text().trim();
+        const ccode = $(this).data('ccode');
+
+        $('#supplierName').val(cname);
+        $('#supplierCode').val(ccode);
+        $('#supplierList').hide();
+
+        $.ajax({
+            url: `/order/supplier/${ccode}`,
+            success: function (data) {
+                $('#supplierOwner').val(data.cowner);
+                $('#supplierPhone').val(data.cphone);
+            }
+        });
+    });
+
+    $(document).click(function (e) {
+        if (!$(e.target).closest('#supplierName').length) {
+            $('#supplierList').hide();
+        }
+    });
+
+    $("button[type='reset']").on("click", function () {
+        setTimeout(() => {
+            $("tbody tr").not(".table_total").each(function () {
+                const $row = $(this);
+                $row.find(".iqty").val(0);
+                $row.find(".supplyTotal, .tax, .rowTotal").text("-");
+                $row.find(".osuprcInput, .otaxInput, .otprcInput").val('');
+            });
+
+            $(".totalQty").text("0");
+            $(".totalSupply").text("0원");
+            $(".totalTax").text("0원");
+            $(".totalAmount").text("0원");
+
+            $(".hidden-oaqty, .hidden-oasuprc, .hidden-oatax, .hidden-oatprc").val('');
+        }, 10);
+    });
+
     $("#submit").on("click", function () {
-        // 쉼표 제거
         $(".iuprc").each(function () {
             const raw = $(this).val();
-            const clean = raw.replace(/,/g, '');
-            $(this).val(clean);
+            $(this).val(raw.replace(/,/g, ''));
         });
 
         updateTotal();
 
-        let hasError = false;
-        
         const supcd = $("#supplierCode").val();
-
         if (!supcd) {
             alert("공급처를 선택해 주세요.");
             $("#supplierName").focus();
-            hasError = true;
+            return;
         }
-        
-        if (hasError) return;
-        
-     	// ✅ [여기에 추가] 자재명 하나 이상 입력했는지 확인
-        let hasAtLeastOneItem = false;
+
+        let hasItem = false;
         $("tbody tr").not(".table_total").each(function () {
-            const itemName = $(this).find(".itemName").val()?.trim() || "";
-            if (itemName !== "") {
-                hasAtLeastOneItem = true;
-                return false; // 하나라도 있으면 탈출
+            if ($(this).find(".itemName").val()?.trim()) {
+                hasItem = true;
+                return false;
             }
         });
 
-        if (!hasAtLeastOneItem) {
+        if (!hasItem) {
             alert("자재명을 최소 1개 이상 입력해주세요.");
-            $(".itemName").first().focus(); 
+            $(".itemName").first().focus();
             return;
         }
 
         const today = new Date().setHours(0, 0, 0, 0);
+        let hasError = false;
 
         $("tbody tr").not(".table_total").each(function () {
             const $row = $(this);
             const itemName = $row.find(".itemName").val()?.trim() || "";
             const dateStr = $row.find(".datepicker").val()?.trim() || "";
-
-            console.log(">> 자재명:", itemName, "| 납기일:", dateStr);
 
             if (itemName !== "") {
                 if (dateStr === "") {
@@ -582,34 +455,23 @@ $(document).ready(function () {
                     return false;
                 }
             }
-        });
-        
-        if (hasError) return;
 
-        $("tbody tr").not(".table_total").each(function () {
-            const itemNameVal = $(this).find(".itemName").val()?.trim() || "";
-            const qtyVal = parseInt($(this).find(".iqty").val() || "0");
-            const dateStr = $(this).find(".datepicker").val()?.trim() || "";
-
-            console.log(">> 자재명:", itemNameVal, "| 수량:", qtyVal);
-
-            if (itemNameVal !== "" && qtyVal === 0) {
+            const qty = parseInt($row.find(".iqty").val() || "0");
+            if (itemName && qty === 0) {
                 alert("입력한 자재의 수량을 0보다 크게 입력해주세요.");
-                $(this).find(".iqty").focus();
+                $row.find(".iqty").focus();
                 hasError = true;
                 return false;
             }
-            
-            if (itemNameVal === "" && qtyVal > 0) {  // ✅ 올바른 변수명 사용
-                alert("자재명을 입력하지 않았습니다. 수량만 입력된 행은 허용되지 않습니다.");
-                $(this).find(".itemName").focus();
+            if (!itemName && qty > 0) {
+                alert("자재명이 없는 행에 수량이 입력되었습니다.");
+                $row.find(".itemName").focus();
                 hasError = true;
-                return false; // 반복 종료
+                return false;
             }
-         // ✅ 날짜만 입력된 경우도 막기
-            if (itemNameVal === "" && dateStr !== "") {
-                alert("자재명을 입력하지 않은 행에 납기일을 설정할 수 없습니다.");
-                $(this).find(".itemName").focus();
+            if (!itemName && dateStr !== "") {
+                alert("자재명을 입력하지 않은 행에 납기일이 설정되었습니다.");
+                $row.find(".itemName").focus();
                 hasError = true;
                 return false;
             }
@@ -635,14 +497,10 @@ $(document).ready(function () {
                 alert("전송실패!");
             }
         });
-        
-        
     });
 });
-
-
-
 </script>
+
 
 </body>
 </html>

@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>입고 목록</title>
-  <link rel="stylesheet" href="/css/total.css" />
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-  <script src="/js/main.js"></script>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>입고 목록</title>
+	<link rel="stylesheet" href="/css/total.css" />
+	<link rel="stylesheet" href="/css/jquery-ui.css" />	
+	<script src="/js/jquery-3.7.1.min.js"></script>
+  	<script src="/js/main.js"></script>
+  	<script src="/js/jquery-ui.js"></script>
 </head>
 <script>
     $(function() {
@@ -93,113 +93,14 @@
 </script>
 <body>
 
-    <!-- header 헤더 시작 -->
-    <header id="header">   
-
-        <div class="h_wrap">
-            <div class="h_inner center">
-                <!-- header 로고 영역 -->
-                <a href="index.html">
-                    <h1 class="tit_h1">
-                        <span class="blind">ERP SPARK</span>
-                    </h1>
-                </a>
-                <!-- header 로고 영역 -->
-
-                <!-- header gnb 영역 -->
-                <ul class="gnb">
-                    <li>
-                        <a href="#none">작업 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">완제품 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">출고 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">자재 재고 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">거래처 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">마이페이지</a>
-                    </li>
-                </ul>
-                <!-- header gnb 영역 -->
-
-                <!-- header snb 영역 -->
-                <div class="snb">
-                    <a href="#none">김철수님</a>
-                </div>
-                <!-- header snb 영역 -->
-            </div>
-        </div>
-    </header>
+     <!-- header 헤더 시작 -->
+    <header th:insert="~{fragments/header}"></header>
     <!-- header 헤더 끝 -->
 
-    <!-- section 컨텐츠 영역 시작 -->
+	<!-- section 컨텐츠 영역 시작 -->
     <section id="section">
         <!-- 죄측 메뉴바 시작 -->
-        <aside id="aside">
-            <ul>
-                <li class="menu01">
-                    <a href="#none">작업 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">작업 지시 목록</a>
-                        </li>
-                        <li>
-                            <a href="#none">작업 지시 등록</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="menu01">
-                    <a href="#none">완제품 재고 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">완제품 재고 목록</a>
-                        </li>
-                        <li>
-                            <a href="#none">완제품 재고 등록</a>
-                        </li>
-                    </ul>
-                </li>
-                
-                <li class="menu01">
-                    <a href="#none">출고 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">출고 목록</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="menu01">
-                    <a href="#none">자재 재고 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">자재 재고 목록</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="menu01">
-                    <a href="#none">거래처 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">거래처 목록</a>
-                        </li>
-                    </ul>
-                </li>
-                
-                <li class="menu01">
-                    <a href="#none">마이페이지</a>
-                </li>
-            </ul>
-        </aside>
+		<aside th:insert="~{fragments/aside}"></aside>
         <!-- 죄측 메뉴바 끝 -->
 
         <!-- 컨텐츠 영역 시작 -->
@@ -208,22 +109,21 @@
                 <h2>입고 목록</h2>
             </div>
             <div class="con_top_wrap">
-                <div class="search_wrap">
-                    <form id="searchForm" method="get" th:action="@{/stockIn/stockInList}">
-					    <input type="text" id="datepicker" name="date" th:value="${date}" placeholder="날짜를 선택하세요.">
+                <form id="searchForm" class="search_wrap" method="get" th:action="@{/stockIn/stockInList}">
+				    <input type="text" id="datepicker" name="date" th:value="${date}" placeholder="날짜를 선택하세요.">
+				    <div class="select_box">
 					    <select id="statusFilter" name="status">
 					        <option value="">발주 상태를 선택하세요.</option>
 						    <option value="입고 대기" th:selected="${status == '입고 대기'}">입고 대기</option>
 						    <option value="입고 완료" th:selected="${status == '입고 완료'}">입고 완료</option>
 						    <option value="입고중" th:selected="${status == '입고중'}">입고중</option>
 					    </select>
-					    <input type="text" id="clientFilter" name="client" th:value="${client}" placeholder="공급처를 검색하세요.">
-					    <input type="text" id="mgrFilter" name="manager" th:value="${manager}" placeholder="담당자를 검색하세요.">
-					    <input type="search" placeholder="검색어를 입력하세요.">
-					    <button class="blue_btn" type="submit">검색</button>
-					</form>
-                </div>
-            
+				    </div>
+				    <input type="search" id="clientFilter" name="client" th:value="${client}" placeholder="공급처를 검색하세요.">
+				    <input type="search" id="mgrFilter" name="manager" th:value="${manager}" placeholder="담당자를 검색하세요.">
+				    <input type="search" placeholder="검색어를 입력하세요.">
+				    <button class="blue_btn" type="submit">검색</button>
+				</form>
             </div>
             <div class="table_wrap">
                 <table class="table1">
@@ -299,20 +199,22 @@
 			    </a>
 			
 			    <!-- 여러 페이지일 때 -->
-				<span th:if="${totalPages > 1}" th:each="n : ${#numbers.sequence(1, totalPages)}">
-				    <a th:href="@{/stockIn/stockInList(indexPage=${n}, status=${status}, client=${client}, manager=${manager}, date=${date})}"
-				       th:classappend="${n == page} ? ' on'">
-				        <p class="flex_center" th:text="${n}"></p>
-				    </a>
-				</span>
-				
+			    <div class="div_page flex_center">
+					<span th:if="${totalPages > 1}" th:each="n : ${#numbers.sequence(1, totalPages)}">
+					    <a th:href="@{/stockIn/stockInList(indexPage=${n}, status=${status}, client=${client}, manager=${manager}, date=${date})}"
+					       th:classappend="${n == page} ? ' page_num'">
+					        <p class="flex_center" th:text="${n}"></p>
+					    </a>
+					</span>
+				</div>
 				<!-- 한 페이지만 있을 때 -->
-				<span th:if="${totalPages == 1}">
-				    <a th:href="@{/stockIn/stockInList(indexPage=1, status=${status}, client=${client}, manager=${manager}, date=${date})}" class="on">
-				        <p class="flex_center">1</p>
-				    </a>
-				</span>
-				
+				<div class="div_page flex_center">
+					<span th:if="${totalPages == 1}">
+					    <a th:href="@{/stockIn/stockInList(indexPage=1, status=${status}, client=${client}, manager=${manager}, date=${date})}" class="page_num">
+					        <p class="flex_center">1</p>
+					    </a>
+					</span>
+				</div>
 			
 			    <!-- 다음 버튼 -->
 			    <a th:href="@{'?indexPage=' + (${page} < ${totalPages} ? ${page + 1} : ${totalPages})}">

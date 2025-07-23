@@ -119,6 +119,7 @@ input[type="text"], select, textarea {
 
 .div_page a.disabled {
     pointer-events: none;  /* 클릭 무시 */
+    cursor: default;
 }
 .div_page a.disabled img {
     opacity: 0.4; 
@@ -250,6 +251,7 @@ input[type="text"], select, textarea {
     flex-direction: column;
     align-items: flex-start;
     overflow-y: auto;
+    overflow-x: visible !important;
     max-height: calc(100vh - 78px);
     /* background-color: #eeeeee; */
 }
@@ -357,6 +359,18 @@ input[type="text"], select, textarea {
     padding: 10px;
     border-radius: 6px;
 }
+.table1 input[type="number"] {
+    width: 100%;
+    border: 1px solid #d1d1d1;
+    padding: 10px;
+    border-radius: 6px;
+}
+.table1 select {
+    width: 90%;
+    border: 1px solid #d1d1d1;
+    padding: 10px;
+    border-radius: 6px;
+}
 .table1 .select_box {
     position: relative;
 }
@@ -379,7 +393,13 @@ input[type="text"], select, textarea {
     transform: translateY(-50%);
 }
 .table1 button {
-    font-size: 1.4rem;
+	font-size: 1.4rem;
+}
+.table1 a {
+    
+    border-radius: 5px;
+    padding: 10px 16px;
+    cursor: pointer;
 }
 .table1 .date_box {
     position: relative;
@@ -518,8 +538,8 @@ input[type="text"], select, textarea {
 }
 .orderForm .ord_title .ordR p {
     font-size: 1.6rem;
-    color: #333;
-    font-weight: 400;
+    color: #666;
+    font-weight: 500;
 }
 .orderForm .ord_top {
     display: flex;
@@ -540,6 +560,12 @@ input[type="text"], select, textarea {
     border-top: 2px solid #000;
     border-collapse: collapse;
 }
+.orderForm .table3 input[type="text"] {
+    width: 100%;
+    border: 1px solid #d1d1d1;
+    padding: 10px;
+    border-radius: 6px;
+}
 .orderForm .table3 th {
     width: 30%;
     text-align: center;
@@ -549,6 +575,7 @@ input[type="text"], select, textarea {
     padding: 15px 10px;
     border-bottom: 1px solid #e1e1e1;
     border-right: 1px solid #e1e1e1;
+	font-weight: lighter;
 }
 .orderForm .table3 td {
     font-size: 1.6rem;
@@ -556,6 +583,7 @@ input[type="text"], select, textarea {
     color: #666;
     padding: 15px 20px;
     border-bottom: 1px solid #e1e1e1;
+	font-weight: lighter;
 }
 .table1 .table_total td {
     font-weight: 500;
@@ -583,3 +611,109 @@ input[type="text"], select, textarea {
 }
 
 /* 발주서 css 끝 */
+
+
+/*수림 selected 클래스 추가*/
+.page_num.selected {
+    background-color: #2563eb !important;
+    color: #fff !important;
+}
+
+/* 자동완성 리스트 스타일 */
+.autocompleteInput { position: relative; z-index: 1000; overflow: visible; }
+.autocompleteInput1 { position: relative; z-index: 1000; overflow: visible; }
+.autocompleteInput2 { position: relative; z-index: 999; overflow: visible; }
+.autocompleteInput3 { position: relative; z-index: 998; overflow: visible; }
+.autocompleteInput4 { position: relative; z-index: 997; overflow: visible; }
+.autocompleteInput5 { position: relative; z-index: 996; overflow: visible; }
+.autocompleteInput6 { position: relative; z-index: 995; overflow: visible; }
+.autocompleteInput7 { position: relative; z-index: 994; overflow: visible; }
+.autocompleteInput8 { position: relative; z-index: 993; overflow: visible; }
+.autocompleteInput9 { position: relative; z-index: 992; overflow: visible; }
+.autocompleteInput10 { position: relative; z-index: 991; overflow: visible; }
+
+.autocomplete-list {
+  position: absolute;
+  z-index: 9999;
+  top: 100%; /* input 바로 아래 */
+  left: 0;
+  width: 100%; /* td 너비와 맞춤 */
+  max-height: 150px;
+  overflow-y: auto;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  display: none; /* 초기 상태 숨김 */
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  font-size: 1.4rem;
+}
+
+
+/* 자동완성 리스트 항목 스타일 */
+.autocomplete-list li {
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autocomplete-list li:hover {
+  background-color: #f2f2f2;
+}
+
+.dateS{
+   width: 15%;
+    border: 1px solid #d1d1d1;
+    padding: 10px;
+    border-radius: 6px;
+    background: url(img/date_icon.svg) no-repeat right 10px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+}
+
+@media print {
+  @page {
+    margin: 20mm 15mm 15mm 15mm; /* top, right, bottom, left */
+  }
+
+
+.print-spacer {
+    height: 63mm;
+  }
+  
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 12pt;
+    color: #000;
+  }
+
+  header, aside, nav, .under_btn_wrap {
+    display: none !important;
+  }
+
+  .ord_title {
+    margin-top: 0;
+    padding-top: 10mm; /* 여유 공간 확보 */
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 8px;
+    word-wrap: break-word;
+  }
+
+  .ord_title, .ord_content, .ord_ucon {
+    page-break-inside: avoid;
+  }
+}
+
+/*수림 selected 클래스 끝*/

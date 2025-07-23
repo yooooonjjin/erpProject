@@ -2,7 +2,7 @@
 	<div class="h_wrap">
 		<div class="h_inner center">
 			<!-- header 로고 영역 -->
-			<a href="index.html">
+			<a href="#none">
 				<h1 class="tit_h1">
  					<span class="blind">ERP SPARK</span>
 				</h1>
@@ -10,7 +10,7 @@
             <!-- header 로고 영역 -->
 
             <!-- header gnb 영역 -->
-            <ul class="gnb">
+            <!-- <ul class="gnb">
                 <li>
                 	<a href="#none">발주 담당자</a>
                 </li>
@@ -20,12 +20,13 @@
                 <li>
                     <a href="#none">입고 담당자</a>
                 </li>
-            </ul>
+            </ul> -->
 			<!-- header gnb 영역 -->
 
             <!-- header snb 영역 -->
             <div class="snb">
-            	<a href="#none">김철수님</a>
+            	<a th:text="${loginEname}"></a>
+            	<a th:href="@{/login/logout}">로그아웃</a>
             </div>
             <!-- header snb 영역 -->
 		</div>

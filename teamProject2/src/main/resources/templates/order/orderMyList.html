@@ -10,13 +10,14 @@
   	<script src="/js/main.js"></script>
   	<script src="/js/jquery-ui.js"></script>
 </head>
+
 <script>
 $(function () {
     
 	$("#datepicker").datepicker({
         dateFormat: "yy-mm-dd"
     });
-  
+
 });
 </script>
 
@@ -35,10 +36,10 @@ $(function () {
         <!-- 컨텐츠 영역 시작 -->
         <div id="contents">
             <div class="con_title">
-                <h2>발주 신청 목록</h2>
+                <h2>자재 목록</h2>
             </div>
             <div class="con_top_wrap">
-            <form method="get" th:action="@{/order}">
+            <form method="get" th:action="@{/order/my}">
                 <div class="search_wrap">
                 
 				    <input type="text" name="ordate" id="datepicker" placeholder="날짜를 선택하세요." th:value="${ordate}">
@@ -51,7 +52,6 @@ $(function () {
 				        </select>
 				    </div>
 				    <input name="supcd" type="search" placeholder="공급처를 검색하세요." th:value="${supcd}">
-				    <input name="omgr" type="search" placeholder="담당자를 검색하세요." th:value="${omgr}">
 				    <input name="onote" type="search" placeholder="검색어를 입력하세요." th:value="${onote}">
 				    <button class="blue_btn">검색</button>
 				
@@ -88,7 +88,7 @@ $(function () {
                         <tr th:each="ord, myStat : ${ordList}">
 						    <td th:text="${startPageRownum - myStat.index}"></td>
 						    <td>
-						        <a th:href="@{|/order/detail?ogubun=${ord.ogubun}&ono=${ord.ono}|}">
+						        <a th:href="@{|/order/detail?ono=${ord.ono}&ostate=${ord.ostate}&ogubun=${ord.ogubun}|}">
 						            <span th:text="${ord.ogubun + ord.ono}"></span>
 						        </a>
 						    </td>
@@ -114,54 +114,55 @@ $(function () {
                 </table>
             </div>
 
-            <!-- 페이지 시작 -->
-            <div class="div_page flex_center">
+        <!-- 페이지 시작 -->
+        <div class="div_page flex_center">
 
 			<!-- 처음 -->
 			<a th:href="${currentPage > 0} ? 
-	                     @{/order(indexpage=1, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})} : null"
+			            @{/order/my(indexpage=1, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})} : null"
 			   th:style="${currentPage > 0} ? 'cursor:pointer' : 'pointer-events: none; opacity: 0.5;'">
-	            <img src="images/page_first.svg" alt="처음 버튼">
+			    <img src="/images/page_first.svg" alt="처음 버튼">
 			</a>
-         
+			
 			<!-- 이전 -->
 			<a th:href="${currentPage > 0} ? 
-                     @{/order(indexpage=${currentPage}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})} : null"
-               th:style="${currentPage > 0} ? 'cursor:pointer' : 'pointer-events: none; opacity: 0.5;'">
-				<img src="images/page_prev.svg" alt="이전 버튼">
+			            @{/order/my(indexpage=${currentPage}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})} : null"
+			   th:style="${currentPage > 0} ? 'cursor:pointer' : 'pointer-events: none; opacity: 0.5;'">
+			    <img src="/images/page_prev.svg" alt="이전 버튼">
 			</a>
-         
+			
 			<!-- 번호 -->
 			<span th:each="n : ${#numbers.sequence(startPage, endPage)}">
-				<a class="page_num"
-                   th:href="@{/order(indexpage=${n}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})}"
-                   th:classappend="${n == currentPage + 1} ? 'selected' : ''">
-					<p class="flex_center" th:text="${n}"></p>
-				</a>
+			    <a class="page_num"
+			       th:href="@{/order/my(indexpage=${n}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})}"
+			       th:classappend="${n == currentPage + 1} ? 'selected' : ''">
+			        <p class="flex_center" th:text="${n}"></p>
+			    </a>
 			</span>
-         
+			
 			<!-- 다음 -->
-         	<a th:href="${currentPage + 1 < ptotalPage} ? 
-                     	@{/order(indexpage=${currentPage + 2}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})} : null"
-               th:style="${currentPage + 1 < ptotalPage} ? 'cursor:pointer' : 'pointer-events: none; opacity: 0.5;'">
-				<img src="images/page_next.svg" alt="다음 버튼">
+			<a th:href="${currentPage + 1 < ptotalPage} ? 
+			            @{/order/my(indexpage=${currentPage + 2}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})} : null"
+			   th:style="${currentPage + 1 < ptotalPage} ? 'cursor:pointer' : 'pointer-events: none; opacity: 0.5;'">
+			    <img src="/images/page_next.svg" alt="다음 버튼">
 			</a>
-         
+			
 			<!-- 마지막 -->
 			<a th:href="${currentPage + 1 < ptotalPage} ? 
-                     	@{/order(indexpage=${ptotalPage}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})} : null"
-               th:style="${currentPage + 1 < ptotalPage} ? 'cursor:pointer' : 'pointer-events: none; opacity: 0.5;'">
-				<img src="images/page_last.svg" alt="끝 버튼">
+			            @{/order/my(indexpage=${ptotalPage}, ordate=${ordate}, ostate=${ostate}, supcd=${supcd}, omgr=${omgr}, onote=${onote})} : null"
+			   th:style="${currentPage + 1 < ptotalPage} ? 'cursor:pointer' : 'pointer-events: none; opacity: 0.5;'">
+			    <img src="/images/page_last.svg" alt="끝 버튼">
 			</a>
 
-		</div>
-     	<!-- 페이지 끝 -->
-     </div>
 
 	</div>
-    <!-- 컨텐츠 영역 끝 -->
-</section>
-<!-- section 컨텐츠 영역 끝 -->
+            <!-- 페이지 끝 -->
+            </div>
+
+        </div>
+        <!-- 컨텐츠 영역 끝 -->
+    </section>
+    <!-- section 컨텐츠 영역 끝 -->
 
 
     
@@ -173,7 +174,7 @@ $(function () {
 	// f5 새로고침 시 검색조건 초기화
 	window.onload = function() {
 	  if(performance.navigation.type === 1) { // 1은 새로고침(F5)
-	    window.location.href = '/order'; // 쿼리 파라미터 없이 새로 이동
+	    window.location.href = '/order/my'; // 쿼리 파라미터 없이 새로 이동
 	  }
 	};
 

@@ -9,107 +9,23 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
   <script src="/js/main.js"></script>
-<script>
-    
-</script>
-
 </head>
+<style>
+    /* select 박스를 숨기기 */
+    .hidden-select {
+        display: none;
+    }
+</style>
 <body>
 
-    <!-- header 헤더 시작 -->
-    <header id="header">   
-
-        <div class="h_wrap">
-            <div class="h_inner center">
-                <!-- header 로고 영역 -->
-                <a href="index.html">
-                    <h1 class="tit_h1">
-                        <span class="blind">ERP SPARK</span>
-                    </h1>
-                </a>
-                <!-- header 로고 영역 -->
-
-                <!-- header gnb 영역 -->
-                <ul class="gnb">
-                    <li>
-                        <a href="#none">자재 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">발주 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">입고 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">공급처 관리</a>
-                    </li>
-                    <li>
-                        <a href="#none">마이페이지</a>
-                    </li>
-                </ul>
-                <!-- header gnb 영역 -->
-
-                <!-- header snb 영역 -->
-                <div class="snb">
-                    <a href="#none">김철수님</a>
-                </div>
-                <!-- header snb 영역 -->
-            </div>
-        </div>
-    </header>
+       <!-- header 헤더 시작 -->
+    <header th:insert="~{fragments/header}"></header>
     <!-- header 헤더 끝 -->
 
-    <!-- section 컨텐츠 영역 시작 -->
+	<!-- section 컨텐츠 영역 시작 -->
     <section id="section">
         <!-- 죄측 메뉴바 시작 -->
-        <aside id="aside">
-            <ul>
-                <li class="menu01">
-                    <a href="#none">자재 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">자재 목록</a>
-                        </li>
-                        <li>
-                            <a href="#none">자재 등록</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="menu01">
-                    <a href="#none">발주 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">발주 목록</a>
-                        </li>
-                        <li>
-                            <a href="#none">발주 신청</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="menu01">
-                    <a href="#none">입고 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">입고 목록</a>
-                        </li>
-                    </ul>
-                </li>
-                
-                <li class="menu01">
-                    <a href="#none">공급처 관리</a>
-                    <ul class="menu02">
-                        <li>
-                            <a href="#none">공급처 목록</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="menu01">
-                    <a href="#none">마이페이지</a>
-                </li>
-            </ul>
-        </aside>
+		<aside th:insert="~{fragments/aside}"></aside>
         <!-- 죄측 메뉴바 끝 -->
 
         <!-- 컨텐츠 영역 시작 -->
@@ -118,9 +34,9 @@
                 <div class="ord_title">
                     <p>입고 명세서 목록</p>
                     <div class="ordR">
-				        <p>입고코드 : <span th:text="${reasonCode}"></span></p>
-				        <p>입고일자 : <span th:text="${todayDate}"></span></p>
-				      </div>
+                    <p>입고코드 : <span th:text="${reasonCode}"></span></p>
+                    <p>입고일자 : <span th:text="${todayDate}"></span></p>
+                  </div>
                 </div>
                 <div class="ord_top">
                     <div class="ord_tcon">
@@ -144,34 +60,34 @@
                         <p>공급처</p>
                         <table class="table3">
                             <tr>
-						        <th>공급처명</th>
-						        <td th:text="${supplier != null ? supplier.cname : ''}">제이앤테크</td>
-						    </tr>
-						    <tr>
-						        <th>대표자</th>
-						        <td th:text="${supplier != null ? supplier.cowner : ''}">김지훈</td>
-						    </tr>
-						    <tr>
-						        <th>연락처</th>
-						        <td th:text="${supplier != null ? supplier.cphone : ''}">031-1111-2222</td>
-						    </tr>
+                          <th>공급처명</th>
+                          <td th:text="${supplier != null ? supplier.cname : ''}">제이앤테크</td>
+                      </tr>
+                      <tr>
+                          <th>대표자</th>
+                          <td th:text="${supplier != null ? supplier.cowner : ''}">김지훈</td>
+                      </tr>
+                      <tr>
+                          <th>연락처</th>
+                          <td th:text="${supplier != null ? supplier.cphone : ''}">031-1111-2222</td>
+                      </tr>
                         </table>
                     </div>
                 </div>
 
                 <div class="ord_content">
                      <table class="table1" id="stockTable">
-				        <colgroup>
-				          <col width="5%"/>
-				          <col width="20%"/>
-				          <col width="10%"/>
-				          <col width="12%"/>
-				          <col width="15%"/>
-				          <col width="10%"/>
-				          <col width="10%"/>
-				          <col width="15%"/>
-				          <col width="15%"/>
-				        </colgroup>
+                    <colgroup>
+                      <col width="5%"/>
+                      <col width="20%"/>
+                      <col width="10%"/>
+                      <col width="12%"/>
+                      <col width="15%"/>
+                      <col width="10%"/>
+                      <col width="10%"/>
+                      <col width="15%"/>
+                      <col width="15%"/>
+                    </colgroup>
                         <thead>
                             <tr>
                                 <th>NO.</th>
@@ -186,62 +102,64 @@
                             </tr>
                         </thead>
                         <tbody id="stockBody">
-						  <!-- stockList를 each로 반복, item은 Map<String, Object> 타입 가정 -->
-						  <tr th:each="item, stat : ${stockList}"
-						      th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
-						    
-						    <!-- 인덱스 (1부터 시작) -->
-						    <td th:text="${stat.index + 1}"></td>
-						    
-						    <!-- 자재명 -->
-						    <td th:text="${item['iname']}"></td>
-						    
-						    <!-- 상태 select -->
-						    <td>
-						      <select name="status" th:value="${item['status']}" readonly>
-						        <option value="가용" th:selected="${item['status'] == '가용'}">가용</option>
-						        <option value="불용" th:selected="${item['status'] == '불용'}">불용</option>
-						      </select>
-						    </td>
-						    
-						    <!-- 창고 select -->
-						    <td>
-						      <select name="ownm" th:value="${item['ownm']}" readonly
->						        <option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
-						        <option value="B 창고" th:selected="${item['ownm'] == 'B 창고'}">B 창고</option>
-						      </select>
-						    </td>
-						    
-						    <!-- 단가 -->
-						    <td class="price" th:text="${#numbers.formatInteger(item['ouprc'], 3, 'COMMA')} + '원'"></td>
-						    
-						    <!-- 주문 수량 -->
-						    <td class="ordqty" th:text="${item['oqty']} + '개'"></td>
-						    
-						    <!-- 입고 수량 입력 -->
-						    <td class="stiqty">
-						      <input type="number" class="stiQtyInput" min="0" style="width: 60px;" readonly/>
-						      <span class="unit">개</span>
-						    </td>
-						    
-						    <!-- 공급가액 -->
-						    <td class="supply" th:text="${#numbers.formatInteger(item['supply'], 3, 'COMMA')}"></td>
-						    
-						    <!-- 세액 -->
-						    <td class="tax" th:text="${#numbers.formatInteger(item['tax'], 3, 'COMMA')}"></td>
-						  </tr>
-						  
-						  <!-- 합계 행 -->
-						  <tr class="table_total">
-						    <td colspan="5">합계</td>
-						    <td id="totalOrdQty" class="totalOrdQty"></td>
-						    <td id="totalStiQty" class="totalStiQty"></td>
-						    <td id="totalSupply" class="totalSupply"></td>
-						    <td id="totalTax" class="totalTax"></td>
-						  </tr>
-						  
-						  
-						</tbody>
+                    <!-- stockList를 each로 반복, item은 Map<String, Object> 타입 가정 -->
+                    <tr th:each="item, stat : ${stockList}"
+                        th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
+                      
+                      <!-- 인덱스 (1부터 시작) -->
+                      <td th:text="${stat.index + 1}"></td>
+                      
+                      <!-- 자재명 -->
+                      <td th:text="${item['iname'] != '' ? item['iname'] : ''}"></td>
+                      
+                      <!-- 상태 select -->
+                      <td>
+                        <select name="status" th:class="${item['status'] == ''} ? 'hidden-select' : ''" th:value="${item['status']}" readonly>
+                          <option value="가용" th:selected="${item['status'] == '가용'}">가용</option>
+                          <option value="불용" th:selected="${item['status'] == '불용'}">불용</option>
+                        </select>
+                      </td>
+                      
+                      <!-- 창고 select -->
+                      <td>
+                        <select name="ownm" th:class="${item['ownm'] == ''} ? 'hidden-select' : ''" th:value="${item['ownm']}" readonly>
+                           <option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
+                          <option value="B 창고" th:selected="${item['ownm'] == 'B 창고'}">B 창고</option>
+                        </select>
+                      </td>
+                      
+                      <!-- 단가 -->
+                      <td th:text="${item['ouprc'] != 0 ? #numbers.formatInteger(item['ouprc'], 3, 'COMMA') + '원' : ''}"></td>
+                      
+                      <!-- 주문 수량 -->
+                      <td class="ordqty" th:text="${item['oqty'] != 0 ? item['oqty'] + '개' : ''}"></td>
+                      
+                      <!-- 입고 수량 입력 -->
+                      <td class="stiqty">
+                        <input type="number" class="stiQtyInput" min="0" style="width: 60px;" 
+                                        th:value="${item['oqty'] != 0 ? item['oqty'] : ''}" 
+                                              th:if="${item['oqty'] != 0}" readonly/>
+                           <span th:if="${item['oqty'] == 0}"></span>
+                      </td>
+                      
+                      <!-- 공급가액 -->
+                      <td class="supply" th:text="${item['supply'] != 0 ? #numbers.formatInteger(item['supply'], 3, 'COMMA') : ''}"></td>
+                      
+                      <!-- 세액 -->
+                      <td class="tax" th:text="${#numbers.formatInteger(item['tax'], 3, 'COMMA')}"></td>
+                    </tr>
+                    
+                    <!-- 합계 행 -->
+                    <tr class="table_total">
+                      <td colspan="5">합계</td>
+                      <td id="totalOrdQty" class="totalOrdQty"></td>
+                      <td id="totalStiQty" class="totalStiQty"></td>
+                      <td id="totalSupply" class="totalSupply"></td>
+                      <td id="totalTax" class="totalTax"></td>
+                    </tr>
+                    
+                    
+                  </tbody>
                     </table>
                 </div>
                 <div class="ord_ucon">
@@ -255,6 +173,9 @@
                     </table>
                 </div>
             </div>
+            <div class="under_btn_wrap flex_center">
+                <button type="button" class="blue_btn" onClick="location='/stockIn/stockInList'">목록</button>
+            </div>
         </div>
         <!-- 컨텐츠 영역 끝 -->
 
@@ -262,40 +183,41 @@
     </section>
     <!-- section 컨텐츠 영역 끝 -->
 
-	<script>
-	function calcTotals() {
-		  let totalOrdQty = 0;
-		  let totalStiQty = 0;
-		  let totalSupply = 0;
-		  let totalTax = 0;
+   <script>
+   function calcTotals() {
+        let totalOrdQty = 0;
+        let totalStiQty = 0;
+        let totalSupply = 0;
+        let totalTax = 0;
 
-		  $('#stockBody tr').each(function () {
-		    const price = parseFloat($(this).find('.price').text().replace(/,/g, '')) || 0;
-		    const ordqty = parseFloat($(this).find('.ordqty').text().replace(/,/g, '')) || 0;
-		    const stiqty = parseFloat($(this).find('.stiQtyInput').val()) || 0;
-		    const supply = price * stiqty;
-		    const tax = supply * 0.1;
+        $('#stockBody tr').each(function () {
+          const price = parseFloat($(this).find('.price').text().replace(/,/g, '')) || 0;
+          const ordqty = parseFloat($(this).find('.ordqty').text().replace(/,/g, '')) || 0;
+          const stiqty = parseFloat($(this).find('.stiQtyInput').val()) || 0;
+          const supply = price * stiqty;
+          const tax = supply * 0.1;
 
-		    $(this).find('.supply').text(supply.toLocaleString());
-		    $(this).find('.tax').text(tax.toLocaleString());
+          $(this).find('.supply').text(supply.toLocaleString());
+          $(this).find('.tax').text(tax.toLocaleString());
 
-		    totalOrdQty += ordqty;
-		    totalStiQty += stiqty;
-		    totalSupply += supply;
-		    totalTax += tax;
-		  });
+          totalOrdQty += ordqty;
+          totalStiQty += stiqty;
+          totalSupply += supply;
+          totalTax += tax;
+        });
 
-		  $('#totalOrdQty').text(totalOrdQty + '개');
-		  $('#totalStiQty').text(totalStiQty + '개');
-		  $('#totalSupply').text(totalSupply.toLocaleString());
-		  $('#totalTax').text(totalTax.toLocaleString());
-		}
-	
-	    $(document).on('input', '.price, .ordqty, .stiqty', calcTotals);
-	    $(document).ready(calcTotals);
-	    
-	    
+        $('#totalOrdQty').text(totalOrdQty + '개');
+        $('#totalStiQty').text(totalStiQty + '개');
+        $('#totalSupply').text(totalSupply.toLocaleString());
+        $('#totalTax').text(totalTax.toLocaleString());
+      }
+   
+       $(document).on('input', '.price, .ordqty, .stiqty', calcTotals);
+       $(document).ready(calcTotals);
+       
+       
     </script>
 
 </body>
 </html>
+

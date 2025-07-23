@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ERP 로그인</title>
+	<link rel="stylesheet" href="css/login.css" />
+	<link rel="stylesheet" href="css/jquery-ui.css" />
+	<script src="js/jquery-3.7.1.min.js"></script>
+	<script src="js/jquery-ui.js"></script>
+	<script src="js/main.js"></script>
+</head>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const form        = document.getElementById('loginForm');
+	const enameEl     = document.getElementById('ename');
+	const ecodeEl     = document.getElementById('ecode');
+	const clientError = document.getElementById('clientError');
+	const serverError = document.getElementById('serverError');
+	
+	let isReload = false;
+	if (performance.getEntriesByType) {
+		const [nav] = performance.getEntriesByType('navigation');
+		if (nav && nav.type === 'reload') {
+			isReload = true;
+		}
+	}
+	
+	if (!isReload && performance.navigation) {
+		isReload = (performance.navigation.type === performance.navigation.TYPE_RELOAD);
+	}
+	
+	if (isReload) {
+		// 새로고침일 때만 오류 초기화
+		[enameEl, ecodeEl].forEach(el => el.classList.remove('error'));
+	    clientError.textContent = '';
+	    serverError.textContent = '';
+	}
+	
+	// mismatch(서버 에러) 감지: reload가 아니고, 서버Error가 남아 있다면
+	if (!isReload && serverError && serverError.textContent.includes('일치하지 않습니다')) {
+   		enameEl.classList.add('error');
+   		ecodeEl.classList.add('error');
+   		ecodeEl.focus();
+	}
+	
+	form.addEventListener('submit', function(e) {
+		// 클라이언트 검증 전에는 항상 클라이언트 오류만 초기화
+	    [enameEl, ecodeEl].forEach(el => el.classList.remove('error'));
+	    clientError.textContent = '';
+	    serverError.textContent = '';
+	    // 서버 오류는 지우지 않습니다—서버 검증까지 통과된 뒤에만 초기화 되니까요
+
+	    const name = enameEl.value.trim();
+	    const code = ecodeEl.value.trim();
+	
+		// 1) 사원명·번호 둘 다 비어
+	    if (!name && !code) {
+	      	e.preventDefault();
+	      	clientError.textContent = '사원번호와 사원명을 입력하세요.';
+	      	enameEl.classList.add('error');
+	      	ecodeEl.classList.add('error');
+	      	ecodeEl.focus();
+	      
+			return;
+		}
+	
+	    // 2) 사원명만 비어
+	    if (!name) {
+	      	e.preventDefault();
+	      	clientError.textContent = '사원명을 입력하세요.';
+	      	enameEl.classList.add('error');
+	      	enameEl.focus();
+	      	
+	      	return;
+	    }
+
+	    // 3) 사원번호만 비어
+	    if (!code) {
+	      	e.preventDefault();
+	      	clientError.textContent = '사원번호를 입력하세요.';
+	      	ecodeEl.classList.add('error');
+	      	ecodeEl.focus();
+	      	
+	      	return;
+	    }
+	});		
+});
+</script>
+
+
+<body>
+	<div id="loginBox">
+        <div class="loginImg">
+            <div class="logo">
+                <p>ERP</p>
+                <p>SPARK</p>
+            </div>
+        </div>
+        <div class="loginInner login_center">
+        	<form id="loginForm" th:action="@{/login}" method="post">
+	            <p class="login_header">ERP SPARK</p>
+	            <div class="login_container">
+	                <p>로그인</p>
+	                <div class="inputWrap">
+						<div class="login_input">
+	                        <label for="ecode">사원번호</label>
+	                        <input type="text"
+	                        	   name="ecode"
+	                        	   id="ecode"
+	                        	   placeholder="사원번호를 입력하세요.">
+	                    </div>
+
+	                	<div class="login_input">
+	                        <label for="ename">사원명</label>
+	                        <input type="text"
+	                        	   name="ename"
+	                        	   id="ename"
+	                        	   placeholder="이름을 입력하세요.">
+	                    </div>
+	                    
+	                    
+	                    <!-- 클라이언트 에러 -->
+						<div id="clientError" class="error_msg"></div>
+	                    
+	                    <!-- 서버 에러: SWITCH로 한 번에 하나만 표시 -->
+						<div id="serverError" th:switch="${error}" class="error_msg">
+							<div th:case="'emptyBoth'">사원명과 사원번호를 입력하세요.</div>
+							<div th:case="'emptyName'">사원명을 입력하세요.</div>
+							<div th:case="'emptyCode'">사원번호를 입력하세요.</div>
+							<div th:case="'mismatch'">사원번호와 이름이 일치하지 않습니다.</div>
+						</div>
+						
+	                </div>
+	            </div>
+	            <button type="submit" class="blue_btn">로그인</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

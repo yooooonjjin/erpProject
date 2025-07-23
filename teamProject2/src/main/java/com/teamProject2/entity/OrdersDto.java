@@ -14,7 +14,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Builder
 public class OrdersDto {
-	
 
     @Id
     @Column(name = "ONO")
@@ -35,14 +34,16 @@ public class OrdersDto {
     private Integer oqty;   // 수량
 
     @Column(name = "OTPRC", nullable = false)
-    private Integer otprc;  // 한 줄 당 총 금액
+    private Integer otprc;  // 총 금액
 
     @Column(name = "OSTATE", length = 20)
     private String ostate;  // 상태
 
+    @CreationTimestamp
     @Column(name = "ORDATE")
     private Timestamp ordate;  // 발주일자
 
+    @UpdateTimestamp
     @Column(name = "OUDATE")
     private Timestamp oudate;  // 수정일
 
@@ -74,10 +75,7 @@ public class OrdersDto {
     private Integer faccd;  // 설비품 코드 (FK)
     
     @Column(length = 100,name = "ONOTE")
-    private String onote;  
-    
-    @Column(name = "STIQTY")
-    private String stiqty;	// 입고 수량
+    private String onote;  // 특이사항 (FK)
     
     @Column(name = "OSUPRC")
     private Integer osuprc;  // 한 줄 당 공급가액
@@ -99,7 +97,16 @@ public class OrdersDto {
     
     @Column(name = "DELST", length = 1, columnDefinition = "CHAR(1) DEFAULT 'Y'")
     private String delst;	// 삭제 상태
+    
+    @Column(name = "CFMEMP")
+    private Integer cfmemp;  // 결재자 사원번호
 
+    @Column(name = "CFMNAME", length = 20)
+    private String cfmname;  // 결재자 사원명
+    
+    @Column(name = "STIQTY")
+    private String stiqty;   // 입고 수량
+    
     @PrePersist
     public void prePersist() {
         if (delst == null) {
@@ -139,6 +146,5 @@ public class OrdersDto {
 
     @Transient
     private Integer icode;    // 자재코드
-
     
 }
