@@ -105,6 +105,13 @@ $(function() {
     
 </script>
 
+<style>
+    /* select 박스를 숨기기 */
+    .hidden-select {
+        display: none;
+    }
+</style>
+
 </head>
 <body>
 
@@ -192,6 +199,7 @@ $(function() {
                             </tr>
                         </thead>
                         <tbody id="stockBody">
+<<<<<<< HEAD
                     <tr th:each="item, stat : ${stockList}"
                        th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
                       <td th:text="${stat.index + 1}"></td>
@@ -219,6 +227,35 @@ $(function() {
                       <td class="supply" th:text="${item['supply'] != 0 ? #numbers.formatInteger(item['supply'], 3, 'COMMA') : ''}"></td>
                       <td class="tax" th:text="${item['tax'] != 0 ? #numbers.formatInteger(item['tax'], 3, 'COMMA') : ''}"></td>
                     </tr>
+=======
+						  <tr th:each="item, stat : ${stockList}"
+							  th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
+						    <td th:text="${stat.index + 1}"></td>
+						    <td th:text="${item['iname'] != '' ? item['iname'] : ''}"></td>
+						    <td>
+						      <select name="status" th:class="${item['status'] == ''} ? 'hidden-select' : ''" th:value="${item['status']}">
+						        <option th:selected="${item.status} == '가용'">가용</option>
+						        <option th:selected="${item.status} == '불용'">불용</option>
+						      </select>
+						    </td>
+						    <td>
+							    <select name="ownm" th:class="${item['ownm'] == ''} ? 'hidden-select' : ''" th:value="${item['ownm']}">
+								  <option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
+								  <option value="B 창고" th:selected="${item['ownm'] == 'B 창고'}">B 창고</option>
+								</select>
+						    </td>
+						    <td class="price" th:text="${item['ouprc'] != 0 ? #numbers.formatInteger(item['ouprc'], 3, 'COMMA') + '원' : ''}"></td>
+						    <td class="ordqty" th:text="${item['oqty'] != 0 ? item['oqty'] + '개' : ''}"></td>
+						    <td class="stiqty">
+						    	<input type="number" class="stiQtyInput" min="0" style="width: 60px;" 
+						    						th:value="${item['oqty'] != 0 ? item['oqty'] : ''}" 
+                   									th:if="${item['oqty'] != 0}"/>
+  								 <span th:if="${item['oqty'] == 0}"></span>
+  							</td>
+						    <td class="supply" th:text="${item['supply'] != 0 ? #numbers.formatInteger(item['supply'], 3, 'COMMA') : ''}"></td>
+						    <td class="tax" th:text="${item['tax'] != 0 ? #numbers.formatInteger(item['tax'], 3, 'COMMA') : ''}"></td>
+						  </tr>
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
                             
                             <tr class="table_total">
                          <td colspan="5">합계</td>

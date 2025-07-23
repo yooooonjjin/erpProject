@@ -37,7 +37,6 @@ import com.teamProject2.service.OrdersService;
 import com.teamProject2.service.ReasonService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/stockIn")
@@ -130,7 +129,11 @@ public class StockInController {
             String matCode = (String) row[3];
             map.put("matCode", matCode != null ? matCode : "Unknown matCode");
 
+<<<<<<< HEAD
             // 상태
+=======
+         // 상태
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
             String state = (String) row[1];
             map.put("stateText", state);
 
@@ -323,6 +326,17 @@ public class StockInController {
 	    return "stockIn/stockInDetail";
 	}
     
+ // 입고 저장(불용 없을 때 전체 저장)
+    @PostMapping("/saveStockInData")
+    @ResponseBody
+    public ResponseEntity<Void> saveStockInData(@RequestBody List<OrdersDto> stockList) {
+        for (OrdersDto dto : stockList) {
+            // 저장 처리
+            ordersService.save(dto);
+        }
+        return ResponseEntity.ok().build();
+    }
+    
     // 불용 사유 저장 후 상태 변경
     @PostMapping("/insertReason")
     @ResponseBody
@@ -450,6 +464,7 @@ public class StockInController {
         return "stockIn/list";
     }
     
+<<<<<<< HEAD
     // 입고 저장(불용 없을 때 전체 저장)
     @PostMapping("/saveStockInData")
     @ResponseBody
@@ -466,5 +481,38 @@ public class StockInController {
         }
         return ResponseEntity.ok().build();
     }
+=======
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
+    
     
   }  
+
+
+//입고 완료 = 담당자가 입고 담당자 이름으로 바뀌게
+//stockInDetail 업데이트
+
+/*
+
+	// 입고 저장(불용 없을 때 전체 저장)
+	 @PostMapping("/insertOrders")
+	    public ResponseEntity<Void> insertStockIn(@RequestBody List<OrdersDto> data) {
+		 System.out.println("🔥 [컨트롤러 진입 성공] dtoList size: " + data.size());
+		 for (OrdersDto dto : data) {
+		        System.out.println("➡️ 입고 행: ono={}, ocode={}, oqty={}, ogubun={}, matcd={}" +
+		                 dto.getOno()+ ","+dto.getOcode()+ ","+ dto.getOqty()+  ","+dto.getOgubun()+  ","+dto.getMatcd() );
+		    }
+	        ordersService.saveAll(data);
+	        return ResponseEntity.ok().build();
+	    }
+	 
+
+	
+	
+	@PostMapping("/reason/insert")
+	@ResponseBody
+	public ResponseEntity<?> insertReason(@RequestBody ReasonDto reasonDto) {
+	    reasonService.save(reasonDto); // DB 저장
+	    return ResponseEntity.ok().build();
+	}
+	
+	*/

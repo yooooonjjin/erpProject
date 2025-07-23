@@ -1036,6 +1036,24 @@ public class OrdersService {
 	 */
     	
     	
+<<<<<<< HEAD
+=======
+    	/**
+    	 * 
+    	 * 입고
+    	 * 
+    	 */
+    	// 입고 코드 생성 (ogubun + ono 형태로)
+    	public String generateNextReasonCode(int ocode) {
+    	    // 입고 코드 생성 로직 확인
+    	    String reasonCode = "STI" + String.format("%03d", ocode);  // 예시로 ocode 기반 입고 코드 생성
+    	    return reasonCode;
+    	}
+
+    	public Page<Object[]> getFilteredOrders(String status, String client, String manager, String date, Pageable pageable) {
+    	    return ordersRepository.findFilteredOrders(status, client, manager, date, pageable);
+    	}
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
     	
 	/**
 	 * 수경 시작
@@ -1119,10 +1137,21 @@ public class OrdersService {
             // 👇 조건 없이 무조건 최길동(1005)으로 담당자 변경
             order.setEmpcd(1005);
 
+<<<<<<< HEAD
             ordersRepository.save(order);
         }
     }
+=======
+    	    // 주문 상태 변경
+    	    @Transactional
+    	    public void updateOrderState(Integer ono) {
+    	    	List<OrdersDto> orderList = ordersRepository.findByOno(ono);
+    	        if (orderList == null || orderList.isEmpty()) {
+    	            throw new RuntimeException("주문을 찾을 수 없습니다. ono: " + ono);
+    	        }
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
 
+<<<<<<< HEAD
     public void save(OrdersDto dto) {
         // 복합키 생성
         OrdersId ordersId = new OrdersId(dto.getOno(), dto.getOgubun(), dto.getOcode());
@@ -1131,9 +1160,24 @@ public class OrdersService {
         Optional<OrdersDto> optional = ordersRepository.findById(ordersId);
         if (optional.isPresent()) {
             OrdersDto order = optional.get();
+=======
+    	        for (OrdersDto order : orderList) {
+    	            order.setOstate("입고 완료");
+    	            order.setOidate(new Timestamp(System.currentTimeMillis()));
 
+    	            // 👇 조건 없이 무조건 최길동(1005)으로 담당자 변경
+    	            order.setEmpcd(1005);
+
+    	            ordersRepository.save(order);
+    	        }
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
+
+<<<<<<< HEAD
             // 입고 수량 누적 저장
             order.setStiqty(dto.getStiqty());
+=======
+    	    }
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
 
             // 공급가액 및 세액 저장
             order.setOsuprc(dto.getOsuprc());
@@ -1146,7 +1190,22 @@ public class OrdersService {
         }
 	}
 
+<<<<<<< HEAD
 	/**
 	 * 수경 끝
 	 */
 }
+=======
+    	            // 공급가액 및 세액 저장
+    	            order.setOsuprc(dto.getOsuprc());
+    	            order.setOtax(dto.getOtax());
+
+    	            // 입고 완료로 상태 변경
+    	            order.setOstate("입고 완료");
+
+    	            ordersRepository.save(order); // 저장
+    	        }
+    		}
+
+} 
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git

@@ -9,6 +9,18 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
   <script src="/js/main.js"></script>
+<<<<<<< HEAD
+=======
+<script>
+    
+</script>
+<style>
+    /* select 박스를 숨기기 */
+    .hidden-select {
+        display: none;
+    }
+</style>
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
 </head>
 <style>
     /* select 박스를 숨기기 */
@@ -102,6 +114,7 @@
                             </tr>
                         </thead>
                         <tbody id="stockBody">
+<<<<<<< HEAD
                     <!-- stockList를 each로 반복, item은 Map<String, Object> 타입 가정 -->
                     <tr th:each="item, stat : ${stockList}"
                         th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
@@ -160,6 +173,66 @@
                     
                     
                   </tbody>
+=======
+						  <!-- stockList를 each로 반복, item은 Map<String, Object> 타입 가정 -->
+						  <tr th:each="item, stat : ${stockList}"
+						      th:attr="data-ogubun=${item['ogubun']}, data-ono=${item['ono']}">
+						    
+						    <!-- 인덱스 (1부터 시작) -->
+						    <td th:text="${stat.index + 1}"></td>
+						    
+						    <!-- 자재명 -->
+						    <td th:text="${item['iname'] != '' ? item['iname'] : ''}"></td>
+						    
+						    <!-- 상태 select -->
+						    <td>
+						      <select name="status" th:class="${item['status'] == ''} ? 'hidden-select' : ''" th:value="${item['status']}" readonly>
+						        <option value="가용" th:selected="${item['status'] == '가용'}">가용</option>
+						        <option value="불용" th:selected="${item['status'] == '불용'}">불용</option>
+						      </select>
+						    </td>
+						    
+						    <!-- 창고 select -->
+						    <td>
+						      <select name="ownm" th:class="${item['ownm'] == ''} ? 'hidden-select' : ''" th:value="${item['ownm']}" readonly>
+						      	<option value="A 창고" th:selected="${item['ownm'] == 'A 창고'}">A 창고</option>
+						        <option value="B 창고" th:selected="${item['ownm'] == 'B 창고'}">B 창고</option>
+						      </select>
+						    </td>
+						    
+						    <!-- 단가 -->
+						    <td th:text="${item['ouprc'] != 0 ? #numbers.formatInteger(item['ouprc'], 3, 'COMMA') + '원' : ''}"></td>
+						    
+						    <!-- 주문 수량 -->
+						    <td class="ordqty" th:text="${item['oqty'] != 0 ? item['oqty'] + '개' : ''}"></td>
+						    
+						    <!-- 입고 수량 입력 -->
+						    <td class="stiqty">
+						      <input type="number" class="stiQtyInput" min="0" style="width: 60px;" 
+						    						th:value="${item['oqty'] != 0 ? item['oqty'] : ''}" 
+                   									th:if="${item['oqty'] != 0}" readonly/>
+  								 <span th:if="${item['oqty'] == 0}"></span>
+						    </td>
+						    
+						    <!-- 공급가액 -->
+						    <td class="supply" th:text="${item['supply'] != 0 ? #numbers.formatInteger(item['supply'], 3, 'COMMA') : ''}"></td>
+						    
+						    <!-- 세액 -->
+						    <td class="tax" th:text="${#numbers.formatInteger(item['tax'], 3, 'COMMA')}"></td>
+						  </tr>
+						  
+						  <!-- 합계 행 -->
+						  <tr class="table_total">
+						    <td colspan="5">합계</td>
+						    <td id="totalOrdQty" class="totalOrdQty"></td>
+						    <td id="totalStiQty" class="totalStiQty"></td>
+						    <td id="totalSupply" class="totalSupply"></td>
+						    <td id="totalTax" class="totalTax"></td>
+						  </tr>
+						  
+						  
+						</tbody>
+>>>>>>> branch 'main' of https://github.com/yooooonjjin/erpProject.git
                     </table>
                 </div>
                 <div class="ord_ucon">
