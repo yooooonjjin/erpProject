@@ -450,7 +450,7 @@ public class StockInController {
         return "stockIn/list";
     }
     
-    // 입고 저장(불용 없을 때 전체 저장1)
+    // 입고 저장(불용 없을 때 전체 저장)
     @PostMapping("/saveStockInData")
     @ResponseBody
     public ResponseEntity<Void> saveStockInData(@RequestBody List<OrdersDto> stockList,
