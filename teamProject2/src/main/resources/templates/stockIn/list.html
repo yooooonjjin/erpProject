@@ -227,7 +227,7 @@
 						    <td class="stiqty">
 						      <input type="number" class="stiQtyInput" min="0" style="width: 60px;" 
 						    						th:value="${item['oqty'] != 0 ? item['oqty'] : ''}" 
-                   									th:if="${item['oqty'] != 0}"/>
+                   									th:if="${item['oqty'] != 0}" readonly/>
   								 <span th:if="${item['oqty'] == 0}"></span>
 						    </td>
 						    
